@@ -54,6 +54,7 @@ th{ background:var(--box); }
       <option value="Numpad + Letters">Numpad + Letters</option>
       <option value="Q through M">Q through M</option>
       <option value="Function Keys (F1-3)">Function Keys (F1-3)</option>
+      <option value="Choose Your Own">Choose Your Own</option>
     </select>
     <select id="templateSelect" style="padding:6px 8px; border-radius:8px; border:1px solid var(--border); background:var(--box); color:var(--text); cursor:pointer;">
       <!-- templates populated dynamically -->
@@ -95,7 +96,7 @@ th{ background:var(--box); }
 </div>
 
 <footer style="margin-top:40px; padding-top:20px; border-top:1px solid var(--border); color:gray; font-size:13px; text-align:center;">
-  <p>Widget created by ChatGPT and VS Code with the help of Sedona Spann. Please download the code and modify how you like!</p>
+  <p>Widget created by Sedona Spann to make scoring roots, or anything, easier with the use of a QWERTY Keyboard.</p>
 </footer>
 
 <script>
@@ -130,6 +131,7 @@ const DEFAULT_COUNTERS = [
 const STORAGE_KEY = "radical_AMF_counter_v2";
 const TEMPLATE_KEY = "radical_AMF_templates_v2";
 const HISTORY_KEY = "radical_AMF_history_v2";
+const CUSTOM_KEY_PRESETS_KEY = "radical_AMF_custom_key_presets_v1";
 
 let state = {
   counters: [],
@@ -152,7 +154,19 @@ function loadState(){
       const parsed = JSON.parse(raw);
       if(parsed && Array.isArray(parsed.counters)){
         state = Object.assign(state, parsed);
-        KEY_ORDER = KEY_PRESETS[state.keyPreset] || KEY_PRESETS["Numpad + Letters"];
+        // Load KEY_ORDER from preset (built-in or custom)
+        if(state.keyPreset.startsWith("custom:")){
+          const customName = state.keyPreset.substring(7);
+          const customPreset = getCustomKeyPresetByName(customName);
+          if(customPreset){
+            KEY_ORDER = customPreset.keys;
+          } else {
+            KEY_ORDER = KEY_PRESETS["Numpad + Letters"];
+            state.keyPreset = "Numpad + Letters";
+          }
+        } else {
+          KEY_ORDER = KEY_PRESETS[state.keyPreset] || KEY_PRESETS["Numpad + Letters"];
+        }
         document.getElementById("keyPresetSelect").value = state.keyPreset;
         document.getElementById("keyDisplayMeta").textContent = "Keys: " + KEY_ORDER.join(" ");
         return;
@@ -212,6 +226,66 @@ function renderTemplates(){
 }
 
 /* =======================
+   Custom Key Presets
+======================= */
+function loadCustomKeyPresets(){
+  const raw = localStorage.getItem(CUSTOM_KEY_PRESETS_KEY);
+  return raw ? JSON.parse(raw) : [];
+}
+function saveCustomKeyPreset(name, keys){
+  if(!name || !keys || !keys.length) return;
+  const presets = loadCustomKeyPresets();
+  const idx = presets.findIndex(p => p.name === name);
+  if(idx !== -1){
+    presets[idx] = { name, keys };
+  } else {
+    presets.push({ name, keys });
+  }
+  localStorage.setItem(CUSTOM_KEY_PRESETS_KEY, JSON.stringify(presets));
+  updateKeyPresetDropdown();
+}
+function getCustomKeyPresetByName(name){
+  const presets = loadCustomKeyPresets();
+  return presets.find(p => p.name === name);
+}
+function deleteCustomKeyPreset(name){
+  const presets = loadCustomKeyPresets();
+  const filtered = presets.filter(p => p.name !== name);
+  localStorage.setItem(CUSTOM_KEY_PRESETS_KEY, JSON.stringify(filtered));
+  updateKeyPresetDropdown();
+}
+function updateKeyPresetDropdown(){
+  const select = document.getElementById("keyPresetSelect");
+  if(!select) return;
+  // Store current built-in options
+  const builtInOptions = ["Numpad + Letters", "Q through M", "Function Keys (F1-3)", "Choose Your Own"];
+  const currentValue = select.value;
+  select.innerHTML = "";
+  // Add built-in options
+  builtInOptions.forEach(optVal => {
+    const opt = document.createElement("option");
+    opt.value = optVal;
+    opt.textContent = optVal;
+    select.appendChild(opt);
+  });
+  // Add custom presets
+  const customPresets = loadCustomKeyPresets();
+  if(customPresets.length > 0){
+    const divider = document.createElement("option");
+    divider.disabled = true;
+    divider.textContent = "─ Custom Presets ─";
+    select.appendChild(divider);
+    customPresets.forEach(preset => {
+      const opt = document.createElement("option");
+      opt.value = `custom:${preset.name}`;
+      opt.textContent = `${preset.name} (${preset.keys.length} keys)`;
+      select.appendChild(opt);
+    });
+  }
+  select.value = currentValue;
+}
+
+/* =======================
    History
 ======================= */
 function addHistory(score){
@@ -246,8 +320,131 @@ function playMilestoneSound(){
   osc.stop(ctx.currentTime + 0.5);
 }
 
+function enterCustomKeyMode(){
+  const modal = document.createElement("div");
+  modal.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:flex;justify-content:center;align-items:center;z-index:9999;";
+  
+  const container = document.createElement("div");
+  container.style.cssText = "background:var(--box);color:var(--text);padding:24px;border-radius:12px;max-width:500px;width:90%;box-shadow:0 4px 12px rgba(0,0,0,0.3);";
+  
+  const title = document.createElement("h3");
+  title.textContent = "Choose Custom Key Bindings";
+  title.style.marginTop = "0";
+  container.appendChild(title);
+  
+  const instruction = document.createElement("p");
+  instruction.style.fontSize = "14px";
+  instruction.style.color = "gray";
+  instruction.textContent = `Press each key in order for the ${state.counters.length} counters below. Press Enter when done.`;
+  container.appendChild(instruction);
+  
+  const countersList = document.createElement("div");
+  countersList.style.cssText = "margin-bottom:16px;max-height:200px;overflow-y:auto;";
+  
+  let capturedKeys = [];
+  let currentIndex = 0;
+  
+  function updateDisplay(){
+    countersList.innerHTML = "";
+    state.counters.forEach((counter, idx) => {
+      const row = document.createElement("div");
+      row.style.cssText = "padding:8px;margin:4px 0;border-radius:6px;border:1px solid var(--border);";
+      if(idx < capturedKeys.length){
+        row.style.background = "var(--box)";
+        row.textContent = `${counter.name}: ${capturedKeys[idx]}`;
+      } else if(idx === capturedKeys.length){
+        row.style.background = "#4a7d3a";
+        row.textContent = `${counter.name}: (waiting for key...)`;
+      } else {
+        row.style.opacity = "0.5";
+        row.textContent = `${counter.name}: (pending)`;
+      }
+      countersList.appendChild(row);
+    });
+  }
+  
+  updateDisplay();
+  container.appendChild(countersList);
+  
+  const presetNameInput = document.createElement("input");
+  presetNameInput.type = "text";
+  presetNameInput.placeholder = "Preset name (e.g., 'My Custom Keys')";
+  presetNameInput.style.cssText = "width:100%;padding:8px;margin-bottom:12px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);box-sizing:border-box;";
+  presetNameInput.disabled = true;
+  container.appendChild(presetNameInput);
+  
+  const buttonRow = document.createElement("div");
+  buttonRow.style.cssText = "display:flex;gap:8px;justify-content:flex-end;";
+  
+  const cancelBtn = document.createElement("button");
+  cancelBtn.textContent = "Cancel";
+  cancelBtn.style.cssText = "padding:8px 16px;border-radius:6px;border:1px solid var(--border);background:var(--box);color:var(--text);cursor:pointer;";
+  cancelBtn.onclick = () => modal.remove();
+  buttonRow.appendChild(cancelBtn);
+  
+  const saveBtn = document.createElement("button");
+  saveBtn.textContent = "Save Preset";
+  saveBtn.style.cssText = "padding:8px 16px;border-radius:6px;border:1px solid var(--border);background:#4a7d3a;color:#fff;cursor:pointer;";
+  saveBtn.disabled = true;
+  saveBtn.onclick = () => {
+    const presetName = presetNameInput.value.trim();
+    if(!presetName){
+      alert("Please enter a preset name.");
+      return;
+    }
+    if(capturedKeys.length !== state.counters.length){
+      alert(`You need to capture ${state.counters.length} keys.`);
+      return;
+    }
+    saveCustomKeyPreset(presetName, capturedKeys);
+    state.keyPreset = `custom:${presetName}`;
+    KEY_ORDER = capturedKeys;
+    document.getElementById("keyDisplayMeta").textContent = "Keys: " + KEY_ORDER.join(" ");
+    document.getElementById("keyPresetSelect").value = state.keyPreset;
+    saveState();
+    modal.remove();
+  };
+  buttonRow.appendChild(saveBtn);
+  container.appendChild(buttonRow);
+  
+  modal.appendChild(container);
+  document.body.appendChild(modal);
+  
+  // Key capture handler
+  function keyHandler(e){
+    // Ignore certain keys
+    if(['Enter','Escape','Control','Alt','Shift','Meta','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Tab'].includes(e.key)){
+      if(e.key === 'Enter' && capturedKeys.length === state.counters.length){
+        e.preventDefault();
+        presetNameInput.disabled = false;
+        presetNameInput.focus();
+        window.removeEventListener("keydown", keyHandler);
+      } else if(e.key === 'Escape'){
+        e.preventDefault();
+        modal.remove();
+        window.removeEventListener("keydown", keyHandler);
+      }
+      return;
+    }
+    e.preventDefault();
+    if(capturedKeys.length < state.counters.length){
+      const key = e.key.toUpperCase();
+      if(!capturedKeys.includes(key)){
+        capturedKeys.push(key);
+        updateDisplay();
+      } else {
+        alert(`Key "${key}" already used. Pick a different key.`);
+      }
+    }
+  }
+  
+  window.addEventListener("keydown", keyHandler);
+  modal.focus();
+}
+
 function updateTotal(){
   // Counters whose names indicate 'extra' or 'intersection' should subtract from the total
+
   function isNegativeCounter(name){
     if(!name) return false;
     const n = String(name).toLowerCase().replace(/[^a-z0-9]+/g,' ');
@@ -574,6 +771,28 @@ document.getElementById("deleteCounterBtn").addEventListener("click",()=>deleteL
 
 document.getElementById("keyPresetSelect").addEventListener("change",e=>{
   const preset=e.target.value;
+  
+  if(preset === "Choose Your Own"){
+    // Enter custom key binding mode
+    enterCustomKeyMode();
+    return;
+  }
+  
+  if(preset.startsWith("custom:")){
+    // Load a saved custom preset
+    const customName = preset.substring(7);
+    const customPreset = getCustomKeyPresetByName(customName);
+    if(customPreset){
+      state.keyPreset = preset;
+      KEY_ORDER = customPreset.keys;
+      document.getElementById("keyDisplayMeta").textContent = "Keys: " + KEY_ORDER.join(" ");
+      saveState();
+      render();
+    }
+    return;
+  }
+  
+  // Load a built-in preset
   state.keyPreset=preset;
   KEY_ORDER=KEY_PRESETS[preset];
   document.getElementById("keyDisplayMeta").textContent="Keys: "+KEY_ORDER.join(" ");
@@ -585,6 +804,7 @@ document.getElementById("keyPresetSelect").addEventListener("change",e=>{
    Init
 ======================= */
 loadState();
+updateKeyPresetDropdown(); // Populate dropdown with built-in and custom presets
 // Ensure a default template exists (names + colors) so users can restore it after changes
 (function ensureDefaultTemplate(){
   const templates = loadTemplates();
