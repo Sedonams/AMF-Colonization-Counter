@@ -625,6 +625,7 @@ function renderHistory(){
       `<td>${r.start_timestamp}</td>`,
       `<td>${r.end_timestamp}</td>`,
       `<td>${r.duration_minutes||0}</td>`,
+      `<td>${r.notes||""}</td>`,
       `<td><button data-idx="${i}" class="small">Delete</button></td>`
     ];
     tr.innerHTML=cells.join("");
@@ -634,7 +635,7 @@ function renderHistory(){
   // Update table header
   const thead=document.querySelector("#historyTable thead");
   thead.innerHTML="";
-  const headerRow=["sample_id", ...allNames, "Start", "End", "Duration (min)", "Delete"];
+  const headerRow=["sample_id", ...allNames, "Start", "End", "Duration (min)", "Notes", "Delete"];
   thead.innerHTML="<tr>"+headerRow.map(h=>`<th>${h}</th>`).join("")+"</tr>";
 
   // Delete buttons
