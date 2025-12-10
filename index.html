@@ -60,14 +60,19 @@ th{ background:var(--box); }
       <!-- templates populated dynamically -->
     </select>
     <button id="toggleModeBtn">Toggle Minimal Mode</button>
-    <button id="resetCountersBtn">Reset Counters</button>
     <button id="saveScoreBtn">Save Score</button>
-    <button id="exportCsvBtn">Export CSV</button>
-    <button id="clearHistoryBtn">Clear Score History</button>
-    <button id="toggleDarkBtn">Dark Mode</button>
     <button id="pauseTimerBtn">Pause Timer</button>
-    <button id="saveTemplateBtn">Save Template</button>
-    <button id="deleteTemplateBtn">Delete Template</button>
+    <div style="position:relative; display:inline-block;">
+      <button id="settingsMenuBtn" style="padding:8px 10px; border-radius:8px;">⚙ Settings</button>
+      <div id="settingsDropdown" style="display:none; position:absolute; top:100%; right:0; background:var(--box); border:1px solid var(--border); border-radius:8px; min-width:200px; box-shadow:0 2px 8px rgba(0,0,0,0.2); z-index:100; margin-top:4px;">
+        <button id="resetCountersBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer; border-bottom:1px solid var(--border);">Reset Counters</button>
+        <button id="saveTemplateBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer; border-bottom:1px solid var(--border);">Save Template</button>
+        <button id="deleteTemplateBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer; border-bottom:1px solid var(--border);">Delete Template</button>
+        <button id="exportCsvBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer; border-bottom:1px solid var(--border);">Export CSV</button>
+        <button id="clearHistoryBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer; border-bottom:1px solid var(--border);">Clear Score History</button>
+        <button id="toggleDarkBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer;">Dark Mode</button>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -816,6 +821,32 @@ document.getElementById("keyPresetSelect").addEventListener("change",e=>{
   document.getElementById("keyDisplayMeta").textContent="Keys: "+KEY_ORDER.join(" ");
   saveState();
   render();
+});
+
+/* =======================
+   Settings Menu Toggle
+======================= */
+const settingsMenuBtn = document.getElementById("settingsMenuBtn");
+const settingsDropdown = document.getElementById("settingsDropdown");
+
+settingsMenuBtn.addEventListener("click", e => {
+  e.stopPropagation();
+  const isVisible = settingsDropdown.style.display !== "none";
+  settingsDropdown.style.display = isVisible ? "none" : "block";
+});
+
+// Close dropdown when clicking outside
+document.addEventListener("click", e => {
+  if(!settingsMenuBtn.contains(e.target) && !settingsDropdown.contains(e.target)){
+    settingsDropdown.style.display = "none";
+  }
+});
+
+// Close dropdown after selecting an option
+settingsDropdown.querySelectorAll("button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    settingsDropdown.style.display = "none";
+  });
 });
 
 /* =======================
