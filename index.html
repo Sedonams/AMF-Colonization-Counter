@@ -171,7 +171,8 @@ function loadTemplates(){ const raw=localStorage.getItem(TEMPLATE_KEY); return r
 function saveTemplate(name){
   if(!name) return;
   const templates=loadTemplates();
-  templates.push({ name: name, counters: state.counters.map(c=>c.name) });
+  // Save full counter objects (name + color) so templates restore colors too
+  templates.push({ name: name, counters: state.counters.map(c=>({ name: c.name, color: c.color || "" })) });
   localStorage.setItem(TEMPLATE_KEY, JSON.stringify(templates));
   alert(`Template "${name}" saved.`);
 }
@@ -179,7 +180,8 @@ function loadTemplate(name){
   const templates=loadTemplates();
   const t=templates.find(x=>x.name===name);
   if(!t) return;
-  state.counters=t.counters.map(n=>({name:n,value:0,color:""}));
+  // Each entry is {name, color}
+  state.counters = t.counters.map(entry => ({ name: entry.name, value: 0, color: entry.color || "" }));
   state.sessionStartTime=null;
   state.sessionEndTime=null;
   saveState(); render();
@@ -524,7 +526,19 @@ document.getElementById("keyPresetSelect").addEventListener("change",e=>{
 /* =======================
    Init
 ======================= */
-loadState(); render();
+loadState();
+// Ensure a default template exists (names + colors) so users can restore it after changes
+(function ensureDefaultTemplate(){
+  const templates = loadTemplates();
+  if(!templates || !templates.length){
+    templates.push({
+      name: "Default Setup",
+      counters: DEFAULT_COUNTERS.map(c=>({ name: c.name, color: c.color || "" }))
+    });
+    localStorage.setItem(TEMPLATE_KEY, JSON.stringify(templates));
+  }
+})();
+render();
 setInterval(()=>{if(!state.paused) updateTimer();},1000);
 </script>
 
