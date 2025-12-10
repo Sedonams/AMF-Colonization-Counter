@@ -55,6 +55,9 @@ th{ background:var(--box); }
       <option value="Q through M">Q through M</option>
       <option value="Function Keys (F1-3)">Function Keys (F1-3)</option>
     </select>
+    <select id="templateSelect" style="padding:6px 8px; border-radius:8px; border:1px solid var(--border); background:var(--box); color:var(--text); cursor:pointer;">
+      <!-- templates populated dynamically -->
+    </select>
     <button id="toggleModeBtn">Toggle Minimal Mode</button>
     <button id="resetAllBtn">Reset All</button>
     <button id="saveScoreBtn">Save Score</button>
@@ -64,6 +67,7 @@ th{ background:var(--box); }
     <button id="pauseTimerBtn">Pause Timer</button>
     <button id="saveTemplateBtn">Save Template</button>
     <button id="loadTemplateBtn">Load Template</button>
+    <button id="deleteTemplateBtn">Delete Template</button>
   </div>
 </header>
 
@@ -171,9 +175,15 @@ function loadTemplates(){ const raw=localStorage.getItem(TEMPLATE_KEY); return r
 function saveTemplate(name){
   if(!name) return;
   const templates=loadTemplates();
-  // Save full counter objects (name + color) so templates restore colors too
-  templates.push({ name: name, counters: state.counters.map(c=>({ name: c.name, color: c.color || "" })) });
+  const entry = { name: name, counters: state.counters.map(c=>({ name: c.name, color: c.color || "" })) };
+  const idx = templates.findIndex(t=>t.name===name);
+  if(idx!==-1){
+    templates[idx]=entry; // overwrite existing
+  } else {
+    templates.push(entry);
+  }
   localStorage.setItem(TEMPLATE_KEY, JSON.stringify(templates));
+  renderTemplates();
   alert(`Template "${name}" saved.`);
 }
 function loadTemplate(name){
@@ -185,6 +195,21 @@ function loadTemplate(name){
   state.sessionStartTime=null;
   state.sessionEndTime=null;
   saveState(); render();
+}
+
+// Populate the templates dropdown
+function renderTemplates(){
+  const select = document.getElementById("templateSelect");
+  if(!select) return;
+  const templates = loadTemplates();
+  select.innerHTML = "";
+  if(!templates || !templates.length){
+    const opt = document.createElement('option'); opt.value=""; opt.textContent="(no templates)"; select.appendChild(opt);
+    return;
+  }
+  templates.forEach(t=>{
+    const opt = document.createElement('option'); opt.value=t.name; opt.textContent=t.name; select.appendChild(opt);
+  });
 }
 
 /* =======================
@@ -223,8 +248,18 @@ function playMilestoneSound(){
 }
 
 function updateTotal(){
-  const total = state.counters.reduce((s,c)=>s+(c.value||0),0);
+  // Counters whose names indicate 'extra' or 'intersection' should subtract from the total
+  function isNegativeCounter(name){
+    if(!name) return false;
+    const n = String(name).toLowerCase().replace(/[^a-z0-9]+/g,' ');
+    return /\b(extra|intersection)\b/.test(n);
+  }
+
+  const positive = state.counters.reduce((s,c)=> s + (isNegativeCounter(c.name)?0:(Number(c.value)||0)), 0);
+  const negative = state.counters.reduce((s,c)=> s + (isNegativeCounter(c.name)?(Number(c.value)||0):0), 0);
+  const total = positive - negative;
   totalCountEl.textContent = `Total: ${total}`;
+
   if(total === 100 && !state.milestoneReached){
     state.milestoneReached = true;
     playMilestoneSound();
@@ -404,6 +439,7 @@ function render(){
   else{ minimalDiv.style.display="none"; countersDiv.style.display="block"; renderFull(); }
   updateTotal(); updateTimer();
   document.body.classList.toggle("dark",state.dark);
+  renderTemplates();
   saveState(); renderHistory();
 }
 
@@ -501,14 +537,32 @@ document.getElementById("pauseTimerBtn").addEventListener("click",()=>{
   document.getElementById("pauseTimerBtn").textContent=state.paused?"Resume Timer":"Pause Timer";
 });
 document.getElementById("saveTemplateBtn").addEventListener("click",()=>{
-  const name=prompt("Enter template name:","MAC22 Template");
-  if(name) saveTemplate(name);
+  const defaultName = "Template_"+(loadTemplates().length+1);
+  const name=prompt("Enter template name:", defaultName);
+  if(!name) return;
+  const existing = loadTemplates().find(t=>t.name===name);
+  if(existing){
+    if(!confirm(`Template "${name}" exists. Overwrite?`)) return;
+  }
+  saveTemplate(name);
 });
 document.getElementById("loadTemplateBtn").addEventListener("click",()=>{
-  const templates=loadTemplates();
-  if(!templates.length){ alert("No templates saved."); return; }
-  const name=prompt("Enter template name to load:\n"+templates.map(t=>t.name).join("\n"));
-  if(name) loadTemplate(name);
+  const select = document.getElementById("templateSelect");
+  if(!select) return;
+  const name = select.value;
+  if(!name){ alert("No template selected."); return; }
+  if(!confirm(`Load template "${name}"? This will reset current counters.`)) return;
+  loadTemplate(name);
+});
+document.getElementById("deleteTemplateBtn").addEventListener("click",()=>{
+  const select = document.getElementById("templateSelect");
+  if(!select) return;
+  const name = select.value;
+  if(!name){ alert("No template selected."); return; }
+  if(!confirm(`Delete template "${name}"? This cannot be undone.`)) return;
+  const templates = loadTemplates().filter(t=>t.name!==name);
+  localStorage.setItem(TEMPLATE_KEY, JSON.stringify(templates));
+  renderTemplates();
 });
 
 document.getElementById("addCounterBtn").addEventListener("click",()=>addCounter());
