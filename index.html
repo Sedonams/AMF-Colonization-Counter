@@ -1,0 +1,532 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>A Radical AMF Colonization Counter</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#ffffff; --text:#111; --box:#f4f4f6; --border:#d0d0d6;
+}
+body.dark{ --bg:#07070a; --text:#eee; --box:#121216; --border:#333; }
+body{ background:var(--bg); color:var(--text); font-family:Inter,Segoe UI,Arial,sans-serif; margin:0; padding:18px; transition:background .2s,color .2s; }
+header{ display:flex; flex-wrap:wrap; align-items:center; gap:16px; margin-bottom:12px; }
+h1{ font-size:25px; margin:0; font-family:'Lobster', cursive; }
+.toolbar{ display:flex; gap:8px; flex-wrap:wrap; margin-left:auto; }
+button{ background:var(--box); color:var(--text); border:1px solid var(--border); padding:8px 10px; border-radius:8px; cursor:pointer; }
+button:active{ transform:translateY(1px); }
+#totalCountContainer{ margin:10px 0; }
+#totalCount{ font-weight:600; }
+#timeInfo{ font-size:14px; color:gray; margin-top:4px; }
+#controlsRow{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+#counters{ display:block; }
+.counter-box{ width:200px; border:1px solid var(--border); border-radius:10px; padding:12px; margin:10px; display:inline-block; vertical-align:top; box-sizing:border-box; }
+.counter-top{ display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.counter-name{ width:100%; padding:6px; border:1px solid var(--border); border-radius:6px; background:transparent; color:inherit; }
+.counter-box, .counter-box * { color: inherit; }
+.key-label{ font-size:12px; color:gray; margin-top:6px; }
+.btn-row{ display:flex; gap:8px; margin-top:10px; }
+.small{ padding:6px 8px; font-size:14px; }
+#minimalModeContainer{ display:none; gap:12px; flex-wrap:wrap; align-items:flex-start; padding-top:6px; }
+.minimal-box{ width:140px; min-height:72px; border-radius:10px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:10px; box-sizing:border-box; cursor:pointer; user-select:none; }
+.minimal-label{ font-size:13px; margin-bottom:6px; text-align:center; word-break:break-word; }
+.minimal-number{ font-size:28px; font-weight:700; }
+.empty-slot{ width:140px; height:72px; border-radius:10px; border:1px dashed var(--border); display:flex;align-items:center;justify-content:center;color:gray; }
+.drag-hint{ font-size:12px; color:gray; margin-left:6px; }
+.add-delete{ display:flex; gap:6px; margin-top:8px; }
+.danger{ border-color:#e08a8a; }
+table{ border-collapse:collapse; margin-top:12px; width:100%; max-width:1200px; }
+th,td{ border:1px solid var(--border); padding:4px 8px; text-align:center; }
+th{ background:var(--box); }
+@media(max-width:800px){ .counter-box{ width:200px; } }
+@media(max-width:520px){ .counter-box{ width:200px; } .minimal-box{ width:48%; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>A Radical AMF Colonization Counter</h1>
+    <div class="meta" id="keyDisplayMeta">Keys: 1 2 3 4 5 Q W E R T A S D F G Z X C V B</div>
+  </div>
+  <div class="toolbar">
+    <select id="keyPresetSelect" style="padding:6px 8px; border-radius:8px; border:1px solid var(--border); background:var(--box); color:var(--text); cursor:pointer;">
+      <option value="Numpad + Letters">Numpad + Letters</option>
+      <option value="Q through M">Q through M</option>
+      <option value="Function Keys (F1-3)">Function Keys (F1-3)</option>
+    </select>
+    <button id="toggleModeBtn">Toggle Minimal Mode</button>
+    <button id="resetAllBtn">Reset All</button>
+    <button id="saveRunBtn">Save Run</button>
+    <button id="exportCsvBtn">Export CSV</button>
+    <button id="clearHistoryBtn">Clear Run History</button>
+    <button id="toggleDarkBtn">Dark Mode</button>
+    <button id="pauseTimerBtn">Pause Timer</button>
+    <button id="saveTemplateBtn">Save Template</button>
+    <button id="loadTemplateBtn">Load Template</button>
+  </div>
+</header>
+
+<div id="totalCountContainer">
+  <div id="totalCount">Total: 0</div>
+  <div id="timeInfo">Waiting to begin</div>
+</div>
+
+<div id="controlsRow">
+  <div>
+    <button id="addCounterBtn">Add Counter</button>
+    <button id="deleteCounterBtn">Delete Last</button>
+    <span class="drag-hint">Drag to reorder (only when Minimal Mode is OFF)</span>
+  </div>
+</div>
+
+<div id="counters"></div>
+<div id="minimalModeContainer"></div>
+
+<div id="historyContainer">
+  <h3>Saved Runs</h3>
+  <table id="historyTable">
+    <thead><th></th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<footer style="margin-top:40px; padding-top:20px; border-top:1px solid var(--border); color:gray; font-size:13px; text-align:center;">
+  <p>Widget created by ChatGPT and VS Code with the help of Sedona Spann. Please download the code and modify how you like!</p>
+</footer>
+
+<script>
+/* =======================
+   Config & State
+======================= */
+const KEY_PRESETS = {
+  "Numpad + Letters": ["1","2","3","4","5","Q","W","E","R","T","A","S","D","F","G","Z","X","C","V","B"],
+  "Q through M": ["Q","W","E","R","T","Y","U","I","O","P","A","S","D","F","G","H","J","K","L","Z","X","C","V","B","N","M"],
+  "Function Keys (F1-3)": ["F1","F2","F3","F4","F5","F6","F7","F8","F9","F10","F11","F12","","1","2","3","4"]
+};
+let KEY_ORDER = KEY_PRESETS["Numpad + Letters"];
+const MAX_COUNTERS = KEY_ORDER.length;
+const DEFAULT_COUNTERS = [
+  { name: "No_Fungus", color: "#562929" }, // Brick Red
+  { name: "AM_Hyphae", color: "#0d0d87" },
+  { name: "DSE", color: "#6d4218" },
+  { name: "LSE", color: "#6d4218" },
+  { name: "Arbuscule", color: "#0d0d87" }, // default neutral
+  { name: "Vesicle", color: "#0d0d87" },
+  { name: "Coil", color: "#0d0d87" },
+  { name: "DSE_and_AM", color: "#9e679e" },
+  { name: "Ves_and_Arb", color: "#0d0d87" },
+  { name: "Olpidium", color: "#432c54" },
+  { name: "Microsclerotia", color: "#6d4218" },
+  { name: "Extra_Structures", color: "#f4f4f6" },
+  { name: "Mold", color: "#432c54" },
+  { name: "Plasmodiophorids", color: "#432c54" },
+  { name: "Dot_Line", color: "#432c54" },
+  { name: "Fine_endo", color: "#0d0d87" }
+];
+const STORAGE_KEY = "radical_AMF_counter_v2";
+const TEMPLATE_KEY = "radical_AMF_templates_v2";
+const HISTORY_KEY = "radical_AMF_history_v2";
+
+let state = {
+  counters: [],
+  minimalMode: false,
+  dark: false,
+  sessionStartTime: null,
+  sessionEndTime: null,
+  paused: false,
+  keyPreset: "Numpad + Letters",
+  milestoneReached: false
+};
+
+/* =======================
+   Load/Save State
+======================= */
+function loadState(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(raw){
+    try{
+      const parsed = JSON.parse(raw);
+      if(parsed && Array.isArray(parsed.counters)){
+        state = Object.assign(state, parsed);
+        KEY_ORDER = KEY_PRESETS[state.keyPreset] || KEY_PRESETS["Numpad + Letters"];
+        document.getElementById("keyPresetSelect").value = state.keyPreset;
+        document.getElementById("keyDisplayMeta").textContent = "Keys: " + KEY_ORDER.join(" ");
+        return;
+      }
+    }catch(e){ }
+  }
+  state.counters = DEFAULT_COUNTERS.map(c => ({ name: c.name, value: 0, color: c.color || "" }));
+  KEY_ORDER = KEY_PRESETS[state.keyPreset];
+  saveState();
+}
+function saveState(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+/* =======================
+   Templates
+======================= */
+function loadTemplates(){ const raw=localStorage.getItem(TEMPLATE_KEY); return raw?JSON.parse(raw):[]; }
+function saveTemplate(name){
+  if(!name) return;
+  const templates=loadTemplates();
+  templates.push({ name: name, counters: state.counters.map(c=>c.name) });
+  localStorage.setItem(TEMPLATE_KEY, JSON.stringify(templates));
+  alert(Template "${name}" saved.);
+}
+function loadTemplate(name){
+  const templates=loadTemplates();
+  const t=templates.find(x=>x.name===name);
+  if(!t) return;
+  state.counters=t.counters.map(n=>({name:n,value:0,color:""}));
+  state.sessionStartTime=null;
+  state.sessionEndTime=null;
+  saveState(); render();
+}
+
+/* =======================
+   History
+======================= */
+function addHistory(run){
+  const hist=JSON.parse(localStorage.getItem(HISTORY_KEY)||"[]");
+  hist.push(run);
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(hist));
+  renderHistory();
+}
+function getHistory(){ return JSON.parse(localStorage.getItem(HISTORY_KEY)||"[]"); }
+function clearHistory(){ if(confirm("Clear all saved runs?")){ localStorage.removeItem(HISTORY_KEY); renderHistory(); } }
+
+/* =======================
+   Rendering
+======================= */
+const countersDiv = document.getElementById("counters");
+const minimalDiv = document.getElementById("minimalModeContainer");
+const totalCountEl = document.getElementById("totalCount");
+const timeInfoEl = document.getElementById("timeInfo");
+const historyTbody = document.querySelector("#historyTable tbody");
+
+function playMilestoneSound(){
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.frequency.value = 800;
+  osc.type = "sine";
+  gain.gain.setValueAtTime(0.3, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 0.5);
+}
+
+function updateTotal(){
+  const total = state.counters.reduce((s,c)=>s+(c.value||0),0);
+  totalCountEl.textContent = Total: ${total}`;
+  if(total === 100 && !state.milestoneReached){
+    state.milestoneReached = true;
+    playMilestoneSound();
+  } else if(total < 100){
+    state.milestoneReached = false;
+  }
+}
+function speak(text){
+  if(!("speechSynthesis" in window)) return;
+  const u = new SpeechSynthesisUtterance(String(text));
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
+}
+function formatTime(ms){
+  if(ms<=0) return "00:00:00";
+  const sec = Math.floor(ms/1000);
+  const h = Math.floor(sec/3600);
+  const m = Math.floor((sec%3600)/60);
+  const s = sec%60;
+  return [h,m,s].map(x=>x.toString().padStart(2,"0")).join(":");
+}
+function updateTimer(){
+  if(!state.sessionStartTime){ timeInfoEl.textContent="Waiting to begin"; return; }
+  const now = state.paused ? state.sessionEndTime : Date.now();
+  const elapsed = now - state.sessionStartTime;
+  timeInfoEl.textContent = Elapsed: ${formatTime(elapsed)}`;
+}
+
+/* Text color for contrast on bg color */
+function textColorForBg(hex){
+  if(!hex) return "";
+  const c=parseInt(hex.slice(1),16);
+  const r=(c>>16)&255, g=(c>>8)&255, b=c&255;
+  const brightness = r*0.299 + g*0.587 + b*0.114;
+
+  // If dark mode, invert the usual logic for very light colors
+  if(document.body.classList.contains("dark")){
+    return brightness > 200 ? "#111" : "#eee"; // very bright bg -> dark text
+  } else {
+    return brightness > 186 ? "#111" : "#eee";
+  }
+}
+
+
+/* Render full mode */
+function renderFull(){
+  countersDiv.innerHTML="";
+  state.counters.forEach((c,idx)=>{
+    const box=document.createElement("div");
+    box.className="counter-box";
+    box.draggable=true;
+    box.dataset.index=idx;
+    box.style.backgroundColor=c.color||"var(--box)";
+    box.style.color=textColorForBg(c.color||"#f4f4f6");
+
+    // Drag & drop
+    box.addEventListener("dragstart",e=>{ e.dataTransfer.setData("text/plain",String(idx)); box.style.opacity="0.5"; });
+    box.addEventListener("dragend",e=>{ box.style.opacity=""; });
+    box.addEventListener("dragover",e=>{ e.preventDefault(); });
+    box.addEventListener("drop",e=>{
+      e.preventDefault();
+      const from=Number(e.dataTransfer.getData("text/plain"));
+      const to=idx;
+      if(isNaN(from)) return;
+      const item=state.counters.splice(from,1)[0];
+      state.counters.splice(to,0,item);
+      saveState();
+      render();
+    });
+
+    box.innerHTML=\
+      <div class="counter-top">
+        <input class="counter-name" data-idx="\" value="\" />
+        <input type="color" value="\" data-idx="\" class="counter-color-picker" title="Choose counter color"/>
+      </div>
+      <div style="margin-top:8px"><strong>Count:</strong> <span id="val-\">\</span></div>
+      <div class="key-label"><strong>Key:</strong> \</div>
+      <div class="btn-row">
+        <button class="small" data-action="inc" data-idx="\">+1</button>
+        <button class="small" data-action="dec" data-idx="\">-1</button>
+        <button class="small" data-action="del" data-idx="\">Delete</button>
+      </div>
+    \;
+    countersDiv.appendChild(box);
+  });
+
+  document.querySelectorAll(".counter-name").forEach(inp=>{
+    inp.addEventListener("change",e=>{
+      const i=Number(inp.dataset.idx);
+      state.counters[i].name=inp.value.trim()||Counter ${i+1}`;
+      saveState(); render();
+    });
+  });
+  document.querySelectorAll(".counter-color-picker").forEach(pick=>{
+    pick.addEventListener("input",e=>{
+      const i=Number(pick.dataset.idx);
+      state.counters[i].color=pick.value;
+      saveState(); render();
+    });
+  });
+  document.querySelectorAll("button[data-action]").forEach(btn=>{
+    btn.addEventListener("click",e=>{
+      const i=Number(btn.dataset.idx);
+      const act=btn.dataset.action;
+      if(act==="inc") incrementAt(i);
+      else if(act==="dec") decrementAt(i);
+      else if(act==="del"){
+        if(confirm(Delete counter "${state.counters[i].name}"? Keys will shift.)){
+          state.counters.splice(i,1); saveState(); render();
+        }
+      }
+    });
+  });
+}
+
+/* Render minimal mode */
+function renderMinimal(){
+  minimalDiv.innerHTML="";
+  minimalDiv.style.display="flex"; minimalDiv.style.flexWrap="wrap";
+  state.counters.forEach((c,idx)=>{
+    const tile=document.createElement("div");
+    tile.className="minimal-box"; tile.dataset.idx=idx;
+    tile.style.backgroundColor=c.color||"var(--box)";
+    tile.style.color=textColorForBg(c.color||"#f4f4f6");
+    tile.innerHTML=<div class="minimal-label">\</div><div class="minimal-number">\</div><div class="meta" style="margin-top:8px">Key: \</div>;
+    tile.onclick=()=>incrementAt(idx);
+    minimalDiv.appendChild(tile);
+  });
+}
+
+/* Render history table */
+function renderHistory(){
+  const hist=getHistory();
+  historyTbody.innerHTML="";
+  if(!hist.length) return;
+
+  // Collect all counter names across all runs
+  const allNames=[...new Set(hist.flatMap(r=>Object.keys(r.counters)))];
+
+  hist.forEach((r,i)=>{
+    const tr=document.createElement("tr");
+    const cells=[
+      <td>\</td>,
+      ...allNames.map(n=><td>\</td>),
+      <td>\</td>,
+      <td>\</td>,
+      <td>\</td>,
+      <td><button data-idx="\" class="small">Delete</button></td>
+    ];
+    tr.innerHTML=cells.join("");
+    historyTbody.appendChild(tr);
+  });
+
+  // Update table header
+  const thead=document.querySelector("#historyTable thead");
+  thead.innerHTML="";
+  const headerRow=["sample_id", ...allNames, "Start", "End", "Duration (min)", "Delete"];
+  thead.innerHTML="<tr>"+headerRow.map(h=><th>\</th>).join("")+"</tr>";
+
+  // Delete buttons
+  document.querySelectorAll("#historyTable button").forEach(btn=>{
+    btn.addEventListener("click",e=>{
+      const i=Number(btn.dataset.idx);
+      const hist=getHistory();
+      if(confirm(Delete run "${hist[i].sample_id}"?)){
+        hist.splice(i,1);
+        localStorage.setItem(HISTORY_KEY,JSON.stringify(hist));
+        renderHistory();
+      }
+    });
+  });
+}
+
+/* Top-level render */
+function render(){
+  if(state.minimalMode){ countersDiv.style.display="none"; minimalDiv.style.display="flex"; renderMinimal(); }
+  else{ minimalDiv.style.display="none"; countersDiv.style.display="block"; renderFull(); }
+  updateTotal(); updateTimer();
+  document.body.classList.toggle("dark",state.dark);
+  saveState(); renderHistory();
+}
+
+/* =======================
+   Counter Ops
+======================= */
+function incrementAt(i){
+  if(!state.counters[i]) return;
+  if(!state.sessionStartTime) state.sessionStartTime=Date.now();
+  if(!state.paused) state.sessionEndTime=Date.now();
+  state.counters[i].value=(Number(state.counters[i].value)||0)+1;
+  saveState(); render(); speak(state.counters[i].value);
+}
+function decrementAt(i){ if(!state.counters[i]) return; state.counters[i].value=Math.max(0,(Number(state.counters[i].value)||0)-1); if(!state.paused) state.sessionEndTime=Date.now(); saveState(); render(); speak(state.counters[i].value); }
+function addCounter(){ if(state.counters.length>=MAX_COUNTERS){ alert(Maximum ${MAX_COUNTERS} counters reached.); return; } const idx=state.counters.length; state.counters.push({name:Counter ${idx+1}`,value:0,color:""}); saveState(); render(); }
+function deleteLast(){ if(state.counters.length===0) return; if(!confirm("Delete last counter? Keys shift.")) return; state.counters.pop(); saveState(); render(); }
+function resetAll(){
+  if(!confirm("Reset all counters and session timing?")) return;
+  state.counters.forEach(c=>c.value=0);
+  state.sessionStartTime=null;
+  state.sessionEndTime=null;
+  state.paused=false;
+  state.milestoneReached=false;
+  saveState(); render();
+}/* =======================
+   Save Run
+======================= */
+function saveRun(){
+  if(!state.sessionStartTime){ alert("No counts yet to save."); return; }
+  const hist=getHistory();
+  const defaultId="Score_"+(hist.length+1);
+  const name = prompt("Enter Sample ID:",defaultId);
+  if(!name) return;
+  const start=new Date(state.sessionStartTime).toLocaleTimeString();
+  const end=new Date(state.sessionEndTime).toLocaleTimeString();
+  const durationSeconds=Math.floor((state.sessionEndTime-state.sessionStartTime)/1000);
+  const durationMinutes=Math.round(durationSeconds/60*100)/100;
+  const countsObj={};
+  state.counters.forEach(c=>countsObj[c.name]=c.value||0);
+  const session={sample_id:name,counters:countsObj,start_timestamp:start,end_timestamp:end,duration_minutes:durationMinutes};
+  addHistory(session);
+  state.counters.forEach(c=>c.value=0); // reset
+  state.sessionStartTime=null; state.sessionEndTime=null; state.paused=false;
+  saveState(); render();
+}
+
+/* =======================
+   Export CSV
+======================= */
+function exportCSV(){
+  const hist=getHistory();
+  if(!hist.length){ alert("No runs to export."); return; }
+  const allNames=[...new Set(hist.flatMap(r=>Object.keys(r.counters)))];
+  const headers=["sample_id", ...allNames,"start_timestamp","end_timestamp","duration_minutes"];
+  const rows = hist.map(r=>{
+    const row=[r.sample_id];
+    allNames.forEach(n=>row.push(r.counters[n]||0));
+    row.push(r.start_timestamp,r.end_timestamp,r.duration_minutes||0);
+    return row.join(",");
+  });
+  const csv=[headers.join(","), ...rows].join("\n");
+  const blob=new Blob([csv],{type:"text/csv"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  const fileName=prompt("Enter filename for export:","radical_AMF_scores.csv")||"radical_AMF_scores.csv";
+  a.download=fileName;
+  a.click();
+}
+
+/* =======================
+   Keyboard Mapping
+======================= */
+document.addEventListener("keydown",e=>{
+  const ae=document.activeElement;
+  if(ae&&(ae.tagName==="INPUT"||ae.tagName==="TEXTAREA"||ae.isContentEditable)) return;
+  const key=String(e.key||"").toUpperCase();
+  if(!key) return;
+  const pos=KEY_ORDER.indexOf(key);
+  if(pos===-1) return;
+  if(pos<state.counters.length){ incrementAt(pos); e.preventDefault(); }
+});
+
+/* =======================
+   Button Events
+======================= */
+document.getElementById("toggleModeBtn").addEventListener("click",()=>{ state.minimalMode=!state.minimalMode; render(); });
+document.getElementById("resetAllBtn").addEventListener("click",()=>resetAll());
+document.getElementById("saveRunBtn").addEventListener("click",()=>saveRun());
+document.getElementById("exportCsvBtn").addEventListener("click",()=>exportCSV());
+document.getElementById("clearHistoryBtn").addEventListener("click",()=>clearHistory());
+document.getElementById("toggleDarkBtn").addEventListener("click",()=>{ state.dark=!state.dark; render(); });
+document.getElementById("pauseTimerBtn").addEventListener("click",()=>{
+  state.paused=!state.paused;
+  if(state.paused) state.sessionEndTime=Date.now();
+  document.getElementById("pauseTimerBtn").textContent=state.paused?"Resume Timer":"Pause Timer";
+});
+document.getElementById("saveTemplateBtn").addEventListener("click",()=>{
+  const name=prompt("Enter template name:","MAC22 Template");
+  if(name) saveTemplate(name);
+});
+document.getElementById("loadTemplateBtn").addEventListener("click",()=>{
+  const templates=loadTemplates();
+  if(!templates.length){ alert("No templates saved."); return; }
+  const name=prompt("Enter template name to load:\n"+templates.map(t=>t.name).join("\n"));
+  if(name) loadTemplate(name);
+});
+
+document.getElementById("addCounterBtn").addEventListener("click",()=>addCounter());
+document.getElementById("deleteCounterBtn").addEventListener("click",()=>deleteLast());
+
+document.getElementById("keyPresetSelect").addEventListener("change",e=>{
+  const preset=e.target.value;
+  state.keyPreset=preset;
+  KEY_ORDER=KEY_PRESETS[preset];
+  document.getElementById("keyDisplayMeta").textContent="Keys: "+KEY_ORDER.join(" ");
+  saveState();
+  render();
+});
+
+/* =======================
+   Init
+======================= */
+loadState(); render();
+setInterval(()=>{if(!state.paused) updateTimer();},1000);
+</script>
+
+</body>
+</html>
