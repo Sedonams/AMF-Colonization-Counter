@@ -60,7 +60,7 @@ th{ background:var(--box); }
       <!-- templates populated dynamically -->
     </select>
     <button id="toggleModeBtn">Toggle Minimal Mode</button>
-    <button id="resetAllBtn">Reset All</button>
+    <button id="resetCountersBtn">Reset Counters</button>
     <button id="saveScoreBtn">Save Score</button>
     <button id="exportCsvBtn">Export CSV</button>
     <button id="clearHistoryBtn">Clear Score History</button>
@@ -396,13 +396,29 @@ function enterCustomKeyMode(){
       alert(`You need to capture ${state.counters.length} keys.`);
       return;
     }
-    saveCustomKeyPreset(presetName, capturedKeys);
+    // Store the preset in localStorage directly without calling updateKeyPresetDropdown yet
+    const presets = loadCustomKeyPresets();
+    const idx = presets.findIndex(p => p.name === presetName);
+    if(idx !== -1){
+      presets[idx] = { name: presetName, keys: capturedKeys };
+    } else {
+      presets.push({ name: presetName, keys: capturedKeys });
+    }
+    localStorage.setItem(CUSTOM_KEY_PRESETS_KEY, JSON.stringify(presets));
+    
+    // Update state
     state.keyPreset = `custom:${presetName}`;
     KEY_ORDER = capturedKeys;
     document.getElementById("keyDisplayMeta").textContent = "Keys: " + KEY_ORDER.join(" ");
-    document.getElementById("keyPresetSelect").value = state.keyPreset;
     saveState();
+    
+    // Remove modal first
     modal.remove();
+    
+    // Then update dropdown and render
+    updateKeyPresetDropdown();
+    document.getElementById("keyPresetSelect").value = state.keyPreset;
+    render();
   };
   buttonRow.appendChild(saveBtn);
   container.appendChild(buttonRow);
@@ -417,12 +433,13 @@ function enterCustomKeyMode(){
       if(e.key === 'Enter' && capturedKeys.length === state.counters.length){
         e.preventDefault();
         presetNameInput.disabled = false;
+        saveBtn.disabled = false;
         presetNameInput.focus();
         window.removeEventListener("keydown", keyHandler);
       } else if(e.key === 'Escape'){
         e.preventDefault();
-        modal.remove();
         window.removeEventListener("keydown", keyHandler);
+        modal.remove();
       }
       return;
     }
@@ -652,7 +669,7 @@ function incrementAt(i){
 function decrementAt(i){ if(!state.counters[i]) return; state.counters[i].value=Math.max(0,(Number(state.counters[i].value)||0)-1); if(!state.paused) state.sessionEndTime=Date.now(); saveState(); render(); speak(state.counters[i].value); }
 function addCounter(){ if(state.counters.length>=MAX_COUNTERS){ alert(`Maximum ${MAX_COUNTERS} counters reached.`); return; } const idx=state.counters.length; state.counters.push({name:`Counter ${idx+1}`,value:0,color:""}); saveState(); render(); }
 function deleteLast(){ if(state.counters.length===0) return; if(!confirm("Delete last counter? Keys shift.")) return; state.counters.pop(); saveState(); render(); }
-function resetAll(){
+function resetCounters(){
   if(!confirm("Reset all counters and session timing?")) return;
   state.counters.forEach(c=>c.value=0);
   state.sessionStartTime=null;
@@ -722,7 +739,7 @@ document.addEventListener("keydown",e=>{
    Button Events
 ======================= */
 document.getElementById("toggleModeBtn").addEventListener("click",()=>{ state.minimalMode=!state.minimalMode; render(); });
-document.getElementById("resetAllBtn").addEventListener("click",()=>resetAll());
+document.getElementById("resetCountersBtn").addEventListener("click",()=>resetCounters());
 document.getElementById("saveScoreBtn").addEventListener("click",()=>saveScore());
 document.getElementById("exportCsvBtn").addEventListener("click",()=>exportCSV());
 document.getElementById("clearHistoryBtn").addEventListener("click",()=>clearHistory());
