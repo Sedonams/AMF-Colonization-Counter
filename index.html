@@ -146,7 +146,8 @@ let state = {
   sessionEndTime: null,
   paused: false,
   keyPreset: "Numpad + Letters",
-  milestoneReached: false
+  milestoneReached: false,
+  majorMilestoneReached: false
 };
 
 /* =======================
@@ -313,16 +314,95 @@ const historyTbody = document.querySelector("#historyTable tbody");
 
 function playMilestoneSound(){
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
-  const osc = ctx.createOscillator();
+  const now = ctx.currentTime;
+  
+  // Create a simple melody: C major scale ascending
+  const notes = [
+    { freq: 262, duration: 0.3 },  // C
+    { freq: 294, duration: 0.3 },  // D
+    { freq: 330, duration: 0.3 },  // E
+    { freq: 349, duration: 0.3 },  // F
+    { freq: 392, duration: 0.3 },  // G
+    { freq: 440, duration: 0.3 },  // A
+    { freq: 494, duration: 0.3 },  // B
+    { freq: 523, duration: 0.6 }   // C (higher, held longer)
+  ];
+  
   const gain = ctx.createGain();
-  osc.connect(gain);
   gain.connect(ctx.destination);
-  osc.frequency.value = 800;
-  osc.type = "sine";
-  gain.gain.setValueAtTime(0.3, ctx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
-  osc.start(ctx.currentTime);
-  osc.stop(ctx.currentTime + 0.5);
+  gain.gain.setValueAtTime(0.3, now);
+  
+  let time = now;
+  notes.forEach(note => {
+    const osc = ctx.createOscillator();
+    osc.connect(gain);
+    osc.frequency.value = note.freq;
+    osc.type = "sine";
+    osc.start(time);
+    osc.stop(time + note.duration);
+    time += note.duration;
+  });
+  
+  gain.gain.exponentialRampToValueAtTime(0.01, time);
+}
+
+function playMajorMilestoneSound(){
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const now = ctx.currentTime;
+  
+  // Create a longer, more celebratory melody (~10 seconds)
+  const notes = [
+    // First phrase - ascending
+    { freq: 262, duration: 0.4 },  // C
+    { freq: 294, duration: 0.4 },  // D
+    { freq: 330, duration: 0.4 },  // E
+    { freq: 349, duration: 0.4 },  // F
+    { freq: 392, duration: 0.4 },  // G
+    { freq: 440, duration: 0.4 },  // A
+    { freq: 494, duration: 0.4 },  // B
+    { freq: 523, duration: 0.8 },  // C (higher)
+    // Second phrase - descending with variation
+    { freq: 523, duration: 0.4 },  // C
+    { freq: 494, duration: 0.4 },  // B
+    { freq: 440, duration: 0.4 },  // A
+    { freq: 392, duration: 0.4 },  // G
+    { freq: 349, duration: 0.4 },  // F
+    { freq: 330, duration: 0.4 },  // E
+    { freq: 294, duration: 0.4 },  // D
+    { freq: 262, duration: 0.8 },  // C
+    // Third phrase - triumphant
+    { freq: 330, duration: 0.5 },  // E
+    { freq: 392, duration: 0.5 },  // G
+    { freq: 523, duration: 0.5 },  // C (high)
+    { freq: 587, duration: 1.0 },  // D (even higher, held)
+    // Final phrase - arpeggio
+    { freq: 262, duration: 0.3 },  // C
+    { freq: 330, duration: 0.3 },  // E
+    { freq: 392, duration: 0.3 },  // G
+    { freq: 523, duration: 0.3 },  // C (high)
+    { freq: 587, duration: 0.3 },  // D
+    { freq: 523, duration: 0.3 },  // C
+    { freq: 392, duration: 0.3 },  // G
+    { freq: 330, duration: 0.3 },  // E
+    { freq: 262, duration: 1.5 }   // C (final, held long)
+  ];
+  
+  const gain = ctx.createGain();
+  gain.connect(ctx.destination);
+  gain.gain.setValueAtTime(0.3, now);
+  
+  let time = now;
+  notes.forEach(note => {
+    const osc = ctx.createOscillator();
+    osc.connect(gain);
+    osc.frequency.value = note.freq;
+    osc.type = "sine";
+    osc.start(time);
+    osc.stop(time + note.duration);
+    time += note.duration;
+  });
+  
+  gain.gain.exponentialRampToValueAtTime(0.01, time);
 }
 
 function enterCustomKeyMode(){
@@ -478,11 +558,16 @@ function updateTotal(){
   const total = positive - negative;
   totalCountEl.textContent = `Total: ${total}`;
 
-  if(total === 100 && !state.milestoneReached){
+  if(total === 150 && !state.majorMilestoneReached){
+    state.majorMilestoneReached = true;
+    playMajorMilestoneSound();
+  } else if(total === 100 && !state.milestoneReached){
     state.milestoneReached = true;
     playMilestoneSound();
   } else if(total < 100){
     state.milestoneReached = false;
+  } else if(total < 150){
+    state.majorMilestoneReached = false;
   }
 }
 function speak(text){
@@ -670,9 +755,9 @@ function incrementAt(i){
   if(!state.sessionStartTime) state.sessionStartTime=Date.now();
   if(!state.paused) state.sessionEndTime=Date.now();
   state.counters[i].value=(Number(state.counters[i].value)||0)+1;
-  saveState(); render(); speak(state.counters[i].value);
+  saveState(); render(); speak(`${state.counters[i].value} ${state.counters[i].name}`);
 }
-function decrementAt(i){ if(!state.counters[i]) return; state.counters[i].value=Math.max(0,(Number(state.counters[i].value)||0)-1); if(!state.paused) state.sessionEndTime=Date.now(); saveState(); render(); speak(state.counters[i].value); }
+function decrementAt(i){ if(!state.counters[i]) return; state.counters[i].value=Math.max(0,(Number(state.counters[i].value)||0)-1); if(!state.paused) state.sessionEndTime=Date.now(); saveState(); render(); speak(`${state.counters[i].value} ${state.counters[i].name}`); }
 function addCounter(){ if(state.counters.length>=MAX_COUNTERS){ alert(`Maximum ${MAX_COUNTERS} counters reached.`); return; } const idx=state.counters.length; state.counters.push({name:`Counter ${idx+1}`,value:0,color:""}); saveState(); render(); }
 function deleteLast(){ if(state.counters.length===0) return; if(!confirm("Delete last counter? Keys shift.")) return; state.counters.pop(); saveState(); render(); }
 function resetCounters(){
