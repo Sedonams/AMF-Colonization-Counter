@@ -686,13 +686,14 @@ function saveScore(){
   const defaultId="Score_"+(hist.length+1);
   const name = prompt("Enter Sample ID:",defaultId);
   if(!name) return;
+  const notes = prompt("Add notes (optional):", "");
   const start=new Date(state.sessionStartTime).toLocaleTimeString();
   const end=new Date(state.sessionEndTime).toLocaleTimeString();
   const durationSeconds=Math.floor((state.sessionEndTime-state.sessionStartTime)/1000);
   const durationMinutes=Math.round(durationSeconds/60*100)/100;
   const countsObj={};
   state.counters.forEach(c=>countsObj[c.name]=c.value||0);
-  const session={sample_id:name,counters:countsObj,start_timestamp:start,end_timestamp:end,duration_minutes:durationMinutes};
+  const session={sample_id:name,counters:countsObj,notes:notes||"",start_timestamp:start,end_timestamp:end,duration_minutes:durationMinutes};
   addHistory(session);
   state.counters.forEach(c=>c.value=0); // reset
   state.sessionStartTime=null; state.sessionEndTime=null; state.paused=false;
