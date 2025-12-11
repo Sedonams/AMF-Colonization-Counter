@@ -325,19 +325,19 @@ function playMilestoneSound(){
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
   const now = ctx.currentTime;
   
-  // Create a simple melody: How do you hold a moon beam in your hand?
+  // Create a simple melody: moon beam
   const notes = [
-    { freq: 330, duration: 0.9 },  // E
-    { freq: 294, duration: 0.4 },  // D
-    { freq: 262, duration: 0.4 },  // C
-    { freq: 247, duration: 0.4 },  // B
-    { freq: 240, duration: 0.7 },  // A
-    { freq: 330, duration: 0.8 },  // E
-    { freq: 294, duration: 0.4 },  // D
-    { freq: 262, duration: 0.4 },  // C 
-    { freq: 294, duration: 0.6 },  // D 
-    { freq: 262, duration: 0.9 },  // C 
-    { freq: 262, duration: 0.2 }  // C 
+    { freq: 330, duration: 0.9 },  // E how
+    { freq: 294, duration: 0.4 },  // D do
+    { freq: 262, duration: 0.4 },  // C you
+    { freq: 247, duration: 0.4 },  // B hold
+    { freq: 240, duration: 0.7 },  // A a
+    { freq: 330, duration: 0.8 },  // E moon
+    { freq: 294, duration: 0.8 },  // D beam
+    { freq: 262, duration: 0.6 },  // C in
+    { freq: 294, duration: 0.6 },  // D your
+    { freq: 262, duration: 0.9 },  // C hand
+    { freq: 262, duration: 2.0 }   // C ...
   ];
   
   const gain = ctx.createGain();
