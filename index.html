@@ -343,7 +343,7 @@ function playMilestoneSound(){
   const gain = ctx.createGain();
   gain.connect(ctx.destination);
   // Increase initial gain so the melody is louder (user requested higher volume)
-  gain.gain.setValueAtTime(1.5, now);
+  gain.gain.setValueAtTime(2, now);
   
   let time = now;
   notes.forEach(note => {
