@@ -47,7 +47,7 @@ th{ background:var(--box); }
 <header>
   <div>
     <h1>A Radical AMF Colonization Counter</h1>
-    <div class="meta" id="keyDisplayMeta">Keys: 1 2 3 4 5 Q W E R T A S D F G Z X C V B</div>
+    <div class="meta" id="keyDisplayMeta">Keys: ` 1 2 3 4 Q W E R A S D F Z X C V </div>
   </div>
   <div class="toolbar">
     <select id="keyPresetSelect" style="padding:6px 8px; border-radius:8px; border:1px solid var(--border); background:var(--box); color:var(--text); cursor:pointer;">
@@ -61,8 +61,6 @@ th{ background:var(--box); }
     </select>
     <button id="toggleModeBtn">Toggle Minimal Mode</button>
     <button id="saveScoreBtn">Save Score</button>
-    <button id="playMoonBtn" title="Play the Moon Beam melody" onclick="playMilestoneSound()">Play Moon Beam</button>
-    <button id="playMajorBtn" title="Play the Major Milestone melody" onclick="playMajorMilestoneSound()">Play Major Melody</button>
     <button id="pauseTimerBtn">Pause Timer</button>
     <div style="position:relative; display:inline-block;">
       <button id="settingsMenuBtn" style="padding:8px 10px; border-radius:8px;">⚙ Settings</button>
@@ -72,7 +70,9 @@ th{ background:var(--box); }
         <button id="deleteTemplateBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer; border-bottom:1px solid var(--border);">Delete Template</button>
         <button id="exportCsvBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer; border-bottom:1px solid var(--border);">Export CSV</button>
         <button id="clearHistoryBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer; border-bottom:1px solid var(--border);">Clear Score History</button>
-        <button id="toggleDarkBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer;">Dark Mode</button>
+        <button id="toggleDarkBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer;">Toggle Dark Mode</button>
+        <button id="playMoonBtn" title="Play the Moon Beam melody" onclick="playMilestoneSound()">Play Moon Beam</button>
+        <button id="playMajorBtn" title="Play the Major Milestone melody" onclick="playMajorMilestoneSound()">Play Major Melody</button>
       </div>
     </div>
   </div>
@@ -111,7 +111,7 @@ th{ background:var(--box); }
    Config & State
 ======================= */
 const KEY_PRESETS = {
-  "Numpad + Letters": ["1","2","3","4","5","Q","W","E","R","T","A","S","D","F","G","Z","X","C","V","B"],
+  "Numpad + Letters": ["`","1","2","3","4","Q","W","E","R","A","S","D","F","Z","X","C","V"],
   "Q through M": ["Q","W","E","R","T","Y","U","I","O","P","A","S","D","F","G","H","J","K","L","Z","X","C","V","B","N","M"],
   "Function Keys (F1-3)": ["F1","F2","F3","F4","F5","F6","F7","F8","F9","F10","F11","F12","`","1","2","3","4"]
 };
