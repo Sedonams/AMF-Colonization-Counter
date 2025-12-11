@@ -56,7 +56,6 @@ th{ background:var(--box); }
       <option value="Function Keys (F1-3)">Function Keys (F1-3)</option>
       <option value="Choose Your Own">Choose Your Own</option>
     </select>
-    <label for="templateSelect" style="font-weight:600;margin-left:6px;margin-right:6px;align-self:center;">Template</label>
     <select id="templateSelect" style="padding:6px 8px; border-radius:8px; border:1px solid var(--border); background:var(--box); color:var(--text); cursor:pointer;">
       <!-- templates populated dynamically -->
     </select>
@@ -397,7 +396,7 @@ function playMajorMilestoneSound(){
     { freq: 523, duration: 0.3 },  // C
     { freq: 392, duration: 0.3 },  // G
     { freq: 330, duration: 0.3 },  // E
-    { freq: 262, duration: 1.5 }   // C (final, held long)
+    { freq: 262, duration: 2.5 }   // C (final, held long)
   ];
   
   const gain = ctx.createGain();
