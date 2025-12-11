@@ -72,7 +72,7 @@ th{ background:var(--box); }
         <button id="clearHistoryBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer; border-bottom:1px solid var(--border);">Clear Score History</button>
         <button id="toggleDarkBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer;">Toggle Dark Mode</button>
         <button id="playMoonBtn" title="Play the Moon Beam melody" onclick="playMilestoneSound()">Play Moon Beam</button>
-        <button id="playMajorBtn" title="Play the Major Milestone melody" onclick="playMajorMilestoneSound()">Play Major Melody</button>
+        <button id="playMajorBtn" title="Play the Festival melody" onclick="playMajorMilestoneSound()">Play Festival</button>
       </div>
     </div>
   </div>
@@ -361,35 +361,36 @@ function playMajorMilestoneSound(){
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
   const now = ctx.currentTime;
   
-  // Create a longer, more celebratory melody (~10 seconds)
+  // Create a longer Melody, The Festival
   const notes = [
     // First phrase - ascending
-    { freq: 262, duration: 0.4 },  // C
-    { freq: 294, duration: 0.2 },  // D
-    { freq: 330, duration: 0.2 },  // E
-    { freq: 349, duration: 0.2 },  // F
-    { freq: 392, duration: 0.4 },  // G
-    { freq: 440, duration: 0.2 },  // A
-    { freq: 494, duration: 0.2 },  // B
-    { freq: 523, duration: 0.8 },  // C (higher)
+    { freq: 494, duration: 0.4 },  // B4
+    { freq: 523, duration: 0.4 },  // C5
+    { freq: 523, duration: 0.2 },  // C5
+    { freq: 494, duration: 0.2 },  // B4
+    { freq: 523, duration: 0.2 },  // C5
+    { freq: 494, duration: 0.2 },  // B4
+    { freq: 659.26, duration: 0.4 },  // E5
+    { freq: 523, duration: 0.2 },  // C5)
+    { freq: 349, duration: 0.4 },  // F4
     // Second phrase - descending with variation
-    { freq: 523, duration: 0.4 },  // C
-    { freq: 494, duration: 0.4 },  // B
-    { freq: 440, duration: 0.4 },  // A
-    { freq: 392, duration: 0.4 },  // G
-    { freq: 349, duration: 0.4 },  // F
-    { freq: 330, duration: 0.4 },  // E
-    { freq: 294, duration: 0.4 },  // D
-    { freq: 262, duration: 0.8 },  // C
+    { freq: 494, duration: 0.4 },  // B4
+    { freq: 523, duration: 0.4 },  // C5
+    { freq: 523, duration: 0.2 },  // C5
+    { freq: 494, duration: 0.2 },  // B4
+    { freq: 523, duration: 0.2 },  // C5
+    { freq: 494, duration: 0.2 },  // B4
+    { freq: 659.26, duration: 0.4 },  // E5
+    { freq: 523, duration: 0.2 },  // C5
+    { freq: 349, duration: 1.4 },  // F4
     // Third phrase - triumphant
-    { freq: 330, duration: 0.5 },  // E
-    { freq: 392, duration: 0.5 },  // G
-    { freq: 523, duration: 0.5 },  // C (high)
-    { freq: 587, duration: 1.0 },  // D (even higher, held)
+    { freq: 523, duration: 0.4 },  // C5
+    { freq: 494, duration: 0.2 },  // B4
+    { freq: 659.26, duration: 1.4 },  // E5 (high)
     // Final phrase - arpeggio
-    { freq: 262, duration: 0.3 },  // C
-    { freq: 330, duration: 0.3 },  // E
-    { freq: 392, duration: 0.3 },  // G
+    { freq: 494, duration: 0.2 },  // B4
+    { freq: 523, duration: 0.4 },  // C5
+    { freq: 440, duration: 0.3 },  // A4
     { freq: 523, duration: 0.3 },  // C (high)
     { freq: 587, duration: 0.3 },  // D
     { freq: 523, duration: 0.3 },  // C
