@@ -103,7 +103,7 @@ th{ background:var(--box); }
 </div>
 
 <footer style="margin-top:40px; padding-top:20px; border-top:1px solid var(--border); color:gray; font-size:13px; text-align:center;">
-  <p>Widget created by Sedona Spann to make scoring roots, or anything, easier with the use of a QWERTY Keyboard.</p>
+  <p>Widget created to make scoring roots, or anything, possible with the use of a QWERTY Keyboard.</p>
 </footer>
 
 <script>
@@ -228,7 +228,7 @@ function renderTemplates(){
   // Always offer the built-in default template as the first option
   const defaultOpt = document.createElement('option');
   defaultOpt.value = "__default__";
-  defaultOpt.textContent = "Default Template";
+  defaultOpt.textContent = "Template";
   select.appendChild(defaultOpt);
 
   if(!templates || !templates.length){
@@ -341,7 +341,8 @@ function playMilestoneSound(){
   
   const gain = ctx.createGain();
   gain.connect(ctx.destination);
-  gain.gain.setValueAtTime(0.3, now);
+  // Increase initial gain so the melody is louder (user requested higher volume)
+  gain.gain.setValueAtTime(0.85, now);
   
   let time = now;
   notes.forEach(note => {
