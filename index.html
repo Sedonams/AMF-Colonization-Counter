@@ -224,8 +224,15 @@ function renderTemplates(){
   if(!select) return;
   const templates = loadTemplates();
   select.innerHTML = "";
+
+  // Always offer the built-in default template as the first option
+  const defaultOpt = document.createElement('option');
+  defaultOpt.value = "__default__";
+  defaultOpt.textContent = "Default Template";
+  select.appendChild(defaultOpt);
+
   if(!templates || !templates.length){
-    const opt = document.createElement('option'); opt.value=""; opt.textContent="(no templates)"; select.appendChild(opt);
+    const opt = document.createElement('option'); opt.value=""; opt.textContent="(no saved templates)"; opt.disabled = true; select.appendChild(opt);
     return;
   }
   templates.forEach(t=>{
@@ -324,13 +331,13 @@ function playMilestoneSound(){
     { freq: 294, duration: 0.4 },  // D
     { freq: 262, duration: 0.4 },  // C
     { freq: 247, duration: 0.4 },  // B
-    { freq: 440, duration: 0.6 },  // A
+    { freq: 440, duration: 0.7 },  // A
     { freq: 330, duration: 0.4 },  // E
     { freq: 294, duration: 0.4 },  // D
     { freq: 262, duration: 0.4 },  // C 
     { freq: 294, duration: 0.6 },  // D 
     { freq: 262, duration: 0.9 },  // C 
-    { freq: 262, duration: 0.9 }   // C 
+    { freq: 262, duration: 0.15 }   // C 
   ];
   
   const gain = ctx.createGain();
@@ -359,12 +366,12 @@ function playMajorMilestoneSound(){
   const notes = [
     // First phrase - ascending
     { freq: 262, duration: 0.4 },  // C
-    { freq: 294, duration: 0.4 },  // D
-    { freq: 330, duration: 0.4 },  // E
-    { freq: 349, duration: 0.4 },  // F
+    { freq: 294, duration: 0.2 },  // D
+    { freq: 330, duration: 0.2 },  // E
+    { freq: 349, duration: 0.2 },  // F
     { freq: 392, duration: 0.4 },  // G
-    { freq: 440, duration: 0.4 },  // A
-    { freq: 494, duration: 0.4 },  // B
+    { freq: 440, duration: 0.2 },  // A
+    { freq: 494, duration: 0.2 },  // B
     { freq: 523, duration: 0.8 },  // C (higher)
     // Second phrase - descending with variation
     { freq: 523, duration: 0.4 },  // C
@@ -862,6 +869,20 @@ document.getElementById("templateSelect").addEventListener("change",()=>{
   if(!select) return;
   const name = select.value;
   if(!name){ return; }
+  // Special-case the built-in default template
+  if(name === "__default__"){
+    if(!confirm(`Load default template? This will reset current counters.`)){
+      renderTemplates();
+      return;
+    }
+    state.counters = DEFAULT_COUNTERS.map(c => ({ name: c.name, value: 0, color: c.color || "" }));
+    state.sessionStartTime = null;
+    state.sessionEndTime = null;
+    state.paused = false;
+    saveState();
+    render();
+    return;
+  }
   if(!confirm(`Load template "${name}"? This will reset current counters.`)){
     // revert selection to no-op (optional)
     renderTemplates();
