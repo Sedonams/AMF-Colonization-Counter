@@ -51,7 +51,7 @@ th{ background:var(--box); }
   </div>
   <div class="toolbar">
     <select id="keyPresetSelect" style="padding:6px 8px; border-radius:8px; border:1px solid var(--border); background:var(--box); color:var(--text); cursor:pointer;">
-      <option value="Numpad + Letters">Numpad + Letters</option>
+      <option value="Four Rows of Four">Four Rows of Four</option>
       <option value="Q through M">Q through M</option>
       <option value="Function Keys (F1-3)">Function Keys (F1-3)</option>
       <option value="Choose Your Own">Choose Your Own</option>
@@ -111,11 +111,11 @@ th{ background:var(--box); }
    Config & State
 ======================= */
 const KEY_PRESETS = {
-  "Numpad + Letters": ["`","1","2","3","4","Q","W","E","R","A","S","D","F","Z","X","C","V"],
+  "Four Rows of Four": ["`","1","2","3","Q","W","E","R","A","S","D","F","Z","X","C","V"],
   "Q through M": ["Q","W","E","R","T","Y","U","I","O","P","A","S","D","F","G","H","J","K","L","Z","X","C","V","B","N","M"],
   "Function Keys (F1-3)": ["F1","F2","F3","F4","F5","F6","F7","F8","F9","F10","F11","F12","`","1","2","3","4"]
 };
-let KEY_ORDER = KEY_PRESETS["Numpad + Letters"];
+let KEY_ORDER = KEY_PRESETS["Four Rows of Four"];
 // Allow up to 30 counters (previously limited to the current key preset length)
 const MAX_COUNTERS = 30;
 const DEFAULT_COUNTERS = [
@@ -148,7 +148,7 @@ let state = {
   sessionStartTime: null,
   sessionEndTime: null,
   paused: false,
-  keyPreset: "Numpad + Letters",
+  keyPreset: "Four Rows of Four",
   milestoneReached: false,
   majorMilestoneReached: false
 };
@@ -170,11 +170,11 @@ function loadState(){
           if(customPreset){
             KEY_ORDER = customPreset.keys;
           } else {
-            KEY_ORDER = KEY_PRESETS["Numpad + Letters"];
-            state.keyPreset = "Numpad + Letters";
+            KEY_ORDER = KEY_PRESETS["Four Rows of Four"];
+            state.keyPreset = "Four Rows of Four";
           }
         } else {
-          KEY_ORDER = KEY_PRESETS[state.keyPreset] || KEY_PRESETS["Numpad + Letters"];
+          KEY_ORDER = KEY_PRESETS[state.keyPreset] || KEY_PRESETS["Four Rows of Four"];
         }
         document.getElementById("keyPresetSelect").value = state.keyPreset;
         document.getElementById("keyDisplayMeta").textContent = "Keys: " + KEY_ORDER.join(" ");
@@ -274,7 +274,7 @@ function updateKeyPresetDropdown(){
   const select = document.getElementById("keyPresetSelect");
   if(!select) return;
   // Store current built-in options
-  const builtInOptions = ["Numpad + Letters", "Q through M", "Function Keys (F1-3)", "Choose Your Own"];
+  const builtInOptions = ["Four Rows of Four", "Q through M", "Function Keys (F1-3)", "Choose Your Own"];
   const currentValue = select.value;
   select.innerHTML = "";
   // Add built-in options
@@ -337,13 +337,13 @@ function playMilestoneSound(){
     { freq: 294, duration: 0.6 },  // D4 beam
     { freq: 262, duration: 0.4 },  // C4 in
     { freq: 294, duration: 0.3 },  // D4 your
-    { freq: 262, duration: 4.0 }   // C4 hand
+    { freq: 262, duration: 4.5 }   // C4 hand
   ];
   
   const gain = ctx.createGain();
   gain.connect(ctx.destination);
   // Increase initial gain so the melody is louder (user requested higher volume)
-  gain.gain.setValueAtTime(1, now);
+  gain.gain.setValueAtTime(1.5, now);
   
   let time = now;
   notes.forEach(note => {
