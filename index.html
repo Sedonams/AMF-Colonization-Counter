@@ -62,6 +62,7 @@ th{ background:var(--box); }
     <button id="toggleModeBtn">Toggle Minimal Mode</button>
     <button id="saveScoreBtn">Save Score</button>
     <button id="playMoonBtn" title="Play the Moon Beam melody" onclick="playMilestoneSound()">Play Moon Beam</button>
+    <button id="playMajorBtn" title="Play the Major Milestone melody" onclick="playMajorMilestoneSound()">Play Major Melody</button>
     <button id="pauseTimerBtn">Pause Timer</button>
     <div style="position:relative; display:inline-block;">
       <button id="settingsMenuBtn" style="padding:8px 10px; border-radius:8px;">⚙ Settings</button>
@@ -317,18 +318,19 @@ function playMilestoneSound(){
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
   const now = ctx.currentTime;
   
-  // Create a simple melody: How do you hold a moon beam in your hand? (~5 seconds)
+  // Create a simple melody: How do you hold a moon beam in your hand?
   const notes = [
-    { freq: 330, duration: 0.4 },  // E
+    { freq: 330, duration: 0.9 },  // E
     { freq: 294, duration: 0.4 },  // D
     { freq: 262, duration: 0.4 },  // C
     { freq: 247, duration: 0.4 },  // B
-    { freq: 440, duration: 0.4 },  // A
+    { freq: 440, duration: 0.6 },  // A
     { freq: 330, duration: 0.4 },  // E
     { freq: 294, duration: 0.4 },  // D
-    { freq: 262, duration: 0.6 },  // C (higher, held longer)
-    { freq: 294, duration: 0.6 },  // D (higher, held longer)
-    { freq: 262, duration: 0.9 }   // C (higher, held longer)
+    { freq: 262, duration: 0.4 },  // C 
+    { freq: 294, duration: 0.6 },  // D 
+    { freq: 262, duration: 0.9 },  // C 
+    { freq: 262, duration: 0.9 }   // C 
   ];
   
   const gain = ctx.createGain();
