@@ -116,7 +116,8 @@ const KEY_PRESETS = {
   "Function Keys (F1-3)": ["F1","F2","F3","F4","F5","F6","F7","F8","F9","F10","F11","F12","`","1","2","3","4"]
 };
 let KEY_ORDER = KEY_PRESETS["Numpad + Letters"];
-const MAX_COUNTERS = KEY_ORDER.length;
+// Allow up to 30 counters (previously limited to the current key preset length)
+const MAX_COUNTERS = 30;
 const DEFAULT_COUNTERS = [
   { name: "No_Fungus", color: "#562929" }, // Brick Red
   { name: "AM_Hyphae", color: "#0d0d87" },
@@ -585,19 +586,21 @@ function updateTotal(){
 }
 function speak(text){
   if(!("speechSynthesis" in window)) return;
-  const msg = new SpeechSynthesisUtterance(String(text));
+  // Replace underscores with spaces so the synthesizer doesn't read them aloud as "underscore"
+  const processedText = String(text).replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
+  const msg = new SpeechSynthesisUtterance(processedText);
 
   // Helper: pick a preferred British (en-GB) / UK voice and prefer common female names
   function selectPreferredVoice(){
     const voices = speechSynthesis.getVoices() || [];
     if(!voices.length) return null;
 
-    // 1) prefer en-GB lang voices
-    let v = voices.find(v => /en-?gb|en-?uk/i.test(v.lang) || /uk|great britain|united kingdom|british/i.test(v.name));
-    if(v) return v;
-
-    // 2) prefer names that are commonly female / UK (heuristic)
+    // 1) prefer names that are commonly female / UK (heuristic)
     v = voices.find(v => /fiona|eilidh|sophie|molly|ava|amelia|victoria|samantha|katherine|kathleen|laura|emily|claire/i.test(v.name));
+    if(v) return v;
+    
+    // 2) prefer en-GB lang voices
+    let v = voices.find(v => /en-?gb|en-?uk/i.test(v.lang) || /uk|great britain|united kingdom|british/i.test(v.name));
     if(v) return v;
 
     // 3) fallback to any en voice
