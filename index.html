@@ -595,17 +595,18 @@ function speak(text){
     const voices = speechSynthesis.getVoices() || [];
     if(!voices.length) return null;
 
-    // 1) prefer names that are commonly female / UK (heuristic)
-    v = voices.find(v => /fiona|eilidh|sophie|molly|ava|amelia|victoria|samantha|katherine|kathleen|laura|emily|claire/i.test(v.name));
-    if(v) return v;
-    
-    // 2) prefer en-GB lang voices
-    let v = voices.find(v => /en-?gb|en-?uk/i.test(v.lang) || /uk|great britain|united kingdom|british/i.test(v.name));
-    if(v) return v;
+    const femaleNamePattern = /fiona|eilidh|sophie|molly|ava|amelia|victoria|samantha|katherine|kathleen|laura|emily|claire/i;
+    // 1) prefer female-sounding known names
+    let voice = voices.find(v => femaleNamePattern.test(v.name));
+    if(voice) return voice;
 
-    // 3) fallback to any en voice
-    v = voices.find(v => /^en/i.test(v.lang));
-    if(v) return v;
+    // 2) prefer en-GB / UK voices by language tag or name
+    voice = voices.find(v => /en-?gb|en-?uk/i.test(v.lang) || /uk|great britain|united kingdom|british/i.test(v.name));
+    if(voice) return voice;
+
+    // 3) fallback to any English voice
+    voice = voices.find(v => /^en/i.test(v.lang));
+    if(voice) return voice;
 
     // 4) final fallback: first available voice
     return voices[0] || null;
