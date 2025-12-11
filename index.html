@@ -342,7 +342,7 @@ function playMilestoneSound(){
   const gain = ctx.createGain();
   gain.connect(ctx.destination);
   // Increase initial gain so the melody is louder (user requested higher volume)
-  gain.gain.setValueAtTime(0.85, now);
+  gain.gain.setValueAtTime(1, now);
   
   let time = now;
   notes.forEach(note => {
@@ -585,9 +585,51 @@ function updateTotal(){
 }
 function speak(text){
   if(!("speechSynthesis" in window)) return;
-  const u = new SpeechSynthesisUtterance(String(text));
+  const msg = new SpeechSynthesisUtterance(String(text));
+
+  // Helper: pick a preferred British (en-GB) / UK voice and prefer common female names
+  function selectPreferredVoice(){
+    const voices = speechSynthesis.getVoices() || [];
+    if(!voices.length) return null;
+
+    // 1) prefer en-GB lang voices
+    let v = voices.find(v => /en-?gb|en-?uk/i.test(v.lang) || /uk|great britain|united kingdom|british/i.test(v.name));
+    if(v) return v;
+
+    // 2) prefer names that are commonly female / UK (heuristic)
+    v = voices.find(v => /fiona|eilidh|sophie|molly|ava|amelia|victoria|samantha|katherine|kathleen|laura|emily|claire/i.test(v.name));
+    if(v) return v;
+
+    // 3) fallback to any en voice
+    v = voices.find(v => /^en/i.test(v.lang));
+    if(v) return v;
+
+    // 4) final fallback: first available voice
+    return voices[0] || null;
+  }
+
+  // If we already cached a preferred voice, use it
+  if(window._preferredVoice){ msg.voice = window._preferredVoice; }
+  else {
+    const v = selectPreferredVoice();
+    if(v){ window._preferredVoice = v; msg.voice = v; }
+  }
+
+  // If voices aren't loaded yet, wait for them and then speak once available
+  const loadedVoices = speechSynthesis.getVoices();
+  if(!loadedVoices || !loadedVoices.length){
+    const handler = () => {
+      window._preferredVoice = selectPreferredVoice();
+      if(window._preferredVoice) msg.voice = window._preferredVoice;
+      speechSynthesis.speak(msg);
+      speechSynthesis.removeEventListener('voiceschanged', handler);
+    };
+    speechSynthesis.addEventListener('voiceschanged', handler);
+    return;
+  }
+
   speechSynthesis.cancel();
-  speechSynthesis.speak(u);
+  speechSynthesis.speak(msg);
 }
 function formatTime(ms){
   if(ms<=0) return "00:00:00";
