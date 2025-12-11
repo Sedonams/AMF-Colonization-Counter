@@ -6,12 +6,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#ffffff; --text:#111; --box:#f4f4f6; --border:#d0d0d6;
+  --bg:#ffffff; --text:#56684c; --box:#f4f4f6; --border:#d0d0d6;
 }
 body.dark{ --bg:#07070a; --text:#eee; --box:#121216; --border:#333; }
 body{ background:var(--bg); color:var(--text); font-family:Inter,Segoe UI,Arial,sans-serif; margin:0; padding:18px; transition:background .2s,color .2s; }
 header{ display:flex; flex-wrap:wrap; align-items:center; gap:16px; margin-bottom:12px; }
-h1{ font-size:25px; margin:0; font-family:'Lobster', cursive; }
+h1{ font-size:28px; margin:0; font-family:'Lobster', cursive; }
 .toolbar{ display:flex; gap:8px; flex-wrap:wrap; margin-left:auto; }
 button{ background:var(--box); color:var(--text); border:1px solid var(--border); padding:8px 10px; border-radius:8px; cursor:pointer; }
 button:active{ transform:translateY(1px); }
@@ -61,6 +61,7 @@ th{ background:var(--box); }
     </select>
     <button id="toggleModeBtn">Toggle Minimal Mode</button>
     <button id="saveScoreBtn">Save Score</button>
+    <button id="playMoonBtn" title="Play the Moon Beam melody" onclick="playMilestoneSound()">Play Moon Beam</button>
     <button id="pauseTimerBtn">Pause Timer</button>
     <div style="position:relative; display:inline-block;">
       <button id="settingsMenuBtn" style="padding:8px 10px; border-radius:8px;">⚙ Settings</button>
@@ -316,16 +317,18 @@ function playMilestoneSound(){
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
   const now = ctx.currentTime;
   
-  // Create a simple melody: C major scale ascending
+  // Create a simple melody: How do you hold a moon beam in your hand? (~5 seconds)
   const notes = [
-    { freq: 262, duration: 0.3 },  // C
-    { freq: 294, duration: 0.3 },  // D
-    { freq: 330, duration: 0.3 },  // E
-    { freq: 349, duration: 0.3 },  // F
-    { freq: 392, duration: 0.3 },  // G
-    { freq: 440, duration: 0.3 },  // A
-    { freq: 494, duration: 0.3 },  // B
-    { freq: 523, duration: 0.6 }   // C (higher, held longer)
+    { freq: 330, duration: 0.4 },  // E
+    { freq: 294, duration: 0.4 },  // D
+    { freq: 262, duration: 0.4 },  // C
+    { freq: 247, duration: 0.4 },  // B
+    { freq: 440, duration: 0.4 },  // A
+    { freq: 330, duration: 0.4 },  // E
+    { freq: 294, duration: 0.4 },  // D
+    { freq: 262, duration: 0.6 },  // C (higher, held longer)
+    { freq: 294, duration: 0.6 },  // D (higher, held longer)
+    { freq: 262, duration: 0.9 }   // C (higher, held longer)
   ];
   
   const gain = ctx.createGain();
