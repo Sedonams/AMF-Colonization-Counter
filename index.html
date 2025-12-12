@@ -71,8 +71,8 @@ th{ background:var(--box); }
         <button id="exportCsvBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer; border-bottom:1px solid var(--border);">Export CSV</button>
         <button id="clearHistoryBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer; border-bottom:1px solid var(--border);">Clear Score History</button>
         <button id="toggleDarkBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer;">Toggle Dark Mode</button>
-        <button id="playMoonBtn" title="Play the Moon Beam melody" onclick="playMilestoneSound()">Play Moon Beam</button>
-        <button id="playMajorBtn" title="Play the Festival melody" onclick="playMajorMilestoneSound()">Play Festival</button>
+        <button id="playMoonBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer;"title="Play the Moon Beam melody" onclick="playMilestoneSound()">Play Moon Beam</button>
+        <button id="playMajorBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer;"title="Play the Festival melody" onclick="playMajorMilestoneSound()">Play Festival</button>
       </div>
     </div>
   </div>
@@ -229,7 +229,7 @@ function renderTemplates(){
   // Always offer the built-in default template as the first option
   const defaultOpt = document.createElement('option');
   defaultOpt.value = "__default__";
-  defaultOpt.textContent = "Template";
+  defaultOpt.textContent = "Select Template";
   select.appendChild(defaultOpt);
 
   if(!templates || !templates.length){
