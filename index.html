@@ -326,7 +326,7 @@ function playMilestoneSound(){
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
   const now = ctx.currentTime;
   
-  // Create a simple melody: moon beam
+  // moon beam
   const notes = [
     { freq: 659.26, duration: 0.72 },  // E5 how
     { freq: 587.32, duration: 0.32 },  // D5 do
@@ -339,22 +339,22 @@ function playMilestoneSound(){
     { freq: 588.00, duration: 0.24 },  // D5 your
     { freq: 524.00, duration: 1.00 },  // C5 hand
   // Final phrase - arpeggio
-    { freq: 524.00, duration: 0.2 },  // C5 
-    { freq: 588.00, duration: 0.2 },  // D5
-    { freq: 524.00, duration: 0.2 },  // C5 
-    { freq: 588.00, duration: 0.2 },  // D5
-    { freq: 524.00, duration: 0.2 },  // C5 
-    { freq: 588.00, duration: 0.2 },  // D5
+    { freq: 524.00, duration: 0.01 },  // C5 
+    { freq: 588.00, duration: 0.01 },  // D5
+    { freq: 524.00, duration: 0.01 },  // C5 
+    { freq: 588.00, duration: 0.01 },  // D5
+    { freq: 524.00, duration: 0.01 },  // C5 
+    { freq: 588.00, duration: 0.01 },  // D5
     { freq: 523, duration: 0.3 },  // C
     { freq: 392, duration: 0.3 },  // G
     { freq: 330, duration: 0.3 },  // E
-    { freq: 524, duration: 3.5 }   // C (final, held long)
+    { freq: 524, duration: 1.5 }   // C (final, held long)
 ];
   
   const gain = ctx.createGain();
   gain.connect(ctx.destination);
   // Increase initial gain so the melody is louder (user requested higher volume)
-  gain.gain.setValueAtTime(2, now);
+  gain.gain.setValueAtTime(1.5, now);
   
   let time = now;
   notes.forEach(note => {
