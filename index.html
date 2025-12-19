@@ -47,44 +47,79 @@ th{ background:var(--box); }
 <header>
   <div>
     <h1>A Radical AMF Colonization Counter</h1>
-    <div class="meta" id="keyDisplayMeta">Keys: ` 1 2 3 4 Q W E R A S D F Z X C V </div>
+    <div class="meta" id="keyDisplayMeta">
+      Keys: ` 1 2 3 4 Q W E R A S D F Z X C V
+    </div>
   </div>
+
   <div class="toolbar">
-    <select id="keyPresetSelect" style="padding:6px 8px; border-radius:8px; border:1px solid var(--border); background:var(--box); color:var(--text); cursor:pointer;">
+
+    <!-- Key preset selector -->
+    <select id="keyPresetSelect"
+      style="padding:6px 8px; border-radius:8px; border:1px solid var(--border);
+             background:var(--box); color:var(--text); cursor:pointer;">
       <option value="Four Rows of Four">Four Rows of Four</option>
       <option value="Q through M">Q through M</option>
       <option value="Function Keys (F1-3)">Function Keys (F1-3)</option>
       <option value="Choose Your Own">Choose Your Own</option>
+    </select>
+
+    <!-- Template menu -->
     <div style="position:relative; display:inline-block;">
-     <button id="templateMenuBtn" style="padding:8px 10px; border-radius:8px;">⚙ Button Template Options</button>
-      <div id="templateDropdown" style="display:none; position:absolute; top:100%; right:0; background:var(--box); border:1px solid var(--border); border-radius:8px; min-width:200px; box-shadow:0 2px 8px rgba(0,0,0,0.2); z-index:100; margin-top:4px;">
-        <button id="saveTemplateBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer; border-bottom:1px solid var(--border);">Save Template</button>
-        <button id="deleteTemplateBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer; border-bottom:1px solid var(--border);">Delete Template</button>
-        <button id="exportTemplateBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer; border-bottom:1px solid var(--border);">Export Template</button>
-        <button id="importTemplateBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer;">Import Template</button>
-      </select>
-     <select id="templateSelect" style="padding:6px 8px; border-radius:8px; border:1px solid var(--border); background:var(--box); color:var(--text); cursor:pointer;">
-      <!-- templates populated dynamically -->
-     </select>
+      <button id="templateMenuBtn" style="padding:8px 10px; border-radius:8px;">
+        ⚙ Button Template Options
+      </button>
+
+      <div id="templateDropdown"
+        style="display:none; position:absolute; top:100%; right:0;
+               background:var(--box); border:1px solid var(--border);
+               border-radius:8px; min-width:200px;
+               box-shadow:0 2px 8px rgba(0,0,0,0.2);
+               z-index:100; margin-top:4px;">
+
+        <button id="saveTemplateBtn">Save Template</button>
+        <button id="deleteTemplateBtn">Delete Template</button>
+        <button id="exportTemplateBtn">Export Template</button>
+        <button id="importTemplateBtn">Import Template</button>
+      </div>
+    </div>
+
+    <!-- Template selector -->
+    <select id="templateSelect"
+      style="padding:6px 8px; border-radius:8px; border:1px solid var(--border);
+             background:var(--box); color:var(--text); cursor:pointer;">
+    </select>
+
     <button id="toggleModeBtn">Toggle Minimal Mode</button>
     <button id="saveScoreBtn">Save Score</button>
     <button id="pauseTimerBtn">Pause Timer</button>
+
+    <!-- Settings menu -->
     <div style="position:relative; display:inline-block;">
-      <button id="settingsMenuBtn" style="padding:8px 10px; border-radius:8px;">⚙ Settings</button>
-      <div id="settingsDropdown" style="display:none; position:absolute; top:100%; right:0; background:var(--box); border:1px solid var(--border); border-radius:8px; min-width:200px; box-shadow:0 2px 8px rgba(0,0,0,0.2); z-index:100; margin-top:4px;">
-        <button id="resetCountersBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer; border-bottom:1px solid var(--border);">Reset Counters</button>
-        <button id="exportCsvBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer; border-bottom:1px solid var(--border);">Export CSV</button>
-        <button id="appendCsvBtn"style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer;">Append to CSV</button>
-        <button id="clearHistoryBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer; border-bottom:1px solid var(--border);">Clear Score History</button>
-        <button id="toggleDarkBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer;">Toggle Dark Mode</button>
-        <button id="playMoonBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer;"title="Play the Moon Beam melody" onclick="playMilestoneSound()">Play Moon Beam</button>
-        <button id="playMajorBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer;"title="Play the Festival melody" onclick="playMajorMilestoneSound()">Play Festival</button>
+      <button id="settingsMenuBtn" style="padding:8px 10px; border-radius:8px;">
+        ⚙ Settings
+      </button>
+
+      <div id="settingsDropdown"
+        style="display:none; position:absolute; top:100%; right:0;
+               background:var(--box); border:1px solid var(--border);
+               border-radius:8px; min-width:200px;
+               box-shadow:0 2px 8px rgba(0,0,0,0.2);
+               z-index:100; margin-top:4px;">
+
+        <button id="resetCountersBtn">Reset Counters</button>
+        <button id="exportCsvBtn">Export CSV</button>
+        <button id="appendCsvBtn">Append to CSV</button>
+        <button id="clearHistoryBtn">Clear Score History</button>
+        <button id="toggleDarkBtn">Toggle Dark Mode</button>
+        <button onclick="playMilestoneSound()">Play Moon Beam</button>
+        <button onclick="playMajorMilestoneSound()">Play Festival</button>
       </div>
     </div>
+
   </div>
- </div>
-</div>
 </header>
+
 
 <div id="totalCountContainer">
   <div id="totalCount">Total: 0</div>
