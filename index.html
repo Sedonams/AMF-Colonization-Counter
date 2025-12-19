@@ -758,26 +758,39 @@ function renderFull(){
       render();
     });
 
-    box.innerHTML=`
-      // Force input text color AFTER elements exist
-       box.querySelectorAll("input").forEach(inp => {
-          inp.style.color = textColor;
-       });
+    box.innerHTML = `
+  <div class="counter-top">
+    <input class="counter-name" data-idx="${idx}" value="${c.name}" />
+    <input type="color"
+      value="${c.color || '#f4f4f6'}"
+      data-idx="${idx}"
+      class="counter-color-picker"
+      title="Choose counter color" />
+  </div>
 
-      <div class="counter-top">
-        <input class="counter-name" data-idx="${idx}" value="${c.name}" />
-        <input type="color" value="${c.color||'#f4f4f6'}" data-idx="${idx}" class="counter-color-picker" title="Choose counter color"/>
-      </div>
-      <div style="margin-top:8px"><strong>Count:</strong> <span id="val-${idx}">${c.value||0}</span></div>
-      <div class="key-label"><strong>Key:</strong> ${KEY_ORDER[idx]||"—"}</div>
-      <div class="btn-row">
-        <button class="small" data-action="inc" data-idx="${idx}">+1</button>
-        <button class="small" data-action="dec" data-idx="${idx}">-1</button>
-        <button class="small" data-action="del" data-idx="${idx}">Delete</button>
-      </div>
-    `;
+  <div style="margin-top:8px">
+    <strong>Count:</strong>
+    <span id="val-${idx}">${c.value || 0}</span>
+  </div>
+
+  <div class="key-label">
+    <strong>Key:</strong> ${KEY_ORDER[idx] || "—"}
+  </div>
+
+  <div class="btn-row">
+    <button class="small" data-action="inc" data-idx="${idx}">+1</button>
+    <button class="small" data-action="dec" data-idx="${idx}">-1</button>
+    <button class="small" data-action="del" data-idx="${idx}">Delete</button>
+  </div>
+`;
     countersDiv.appendChild(box);
   });
+
+  // Force input text color AFTER elements exist
+box.querySelectorAll("input").forEach(inp => {
+  inp.style.color = textColor;
+});
+
 
   document.querySelectorAll(".counter-name").forEach(inp=>{
     inp.addEventListener("change",e=>{
