@@ -24,6 +24,18 @@ button:active{ transform:translateY(1px); }
 .counter-top{ display:flex; justify-content:space-between; align-items:center; gap:8px; }
 .counter-name{ width:100%; padding:6px; border:1px solid var(--border); border-radius:6px; background:transparent; color:inherit; }
 .counter-box, .counter-box * { color: inherit; }
+.counter-box button {
+  background: rgba(255,255,255,0.85);
+  color: #111;
+  border: 1px solid var(--border);
+}
+body.dark .counter-box button {
+  background: rgba(0,0,0,0.7);
+  color: #eee;
+}
+.counter-box button {
+  backdrop-filter: blur(2px);
+}
 .key-label{ font-size:12px; color:gray; margin-top:6px; }
 .btn-row{ display:flex; gap:8px; margin-top:10px; }
 .small{ padding:6px 8px; font-size:14px; }
@@ -728,6 +740,12 @@ function renderFull(){
     box.dataset.index=idx;
     box.style.backgroundColor=c.color||"var(--box)";
     box.style.color=textColorForBg(c.color||"#f4f4f6");
+    const textColor = textColorForBg(c.color || "#f4f4f6");
+    box.style.color = textColor;
+    // Force inputs to match
+    box.querySelectorAll("input").forEach(inp => {
+       inp.style.color = textColor;
+    });
 
     // Drag & drop
     box.addEventListener("dragstart",e=>{ e.dataTransfer.setData("text/plain",String(idx)); box.style.opacity="0.5"; });
@@ -772,6 +790,14 @@ function renderFull(){
       const i=Number(pick.dataset.idx);
       state.counters[i].color=pick.value;
       saveState(); render();
+    });
+  });
+  document.querySelectorAll(".counter-color-picker").forEach(pick => {
+    pick.addEventListener("mousedown", e => {
+      e.stopPropagation(); // prevents drag
+    });
+    pick.addEventListener("click", e => {
+    e.stopPropagation(); // keeps picker open
     });
   });
   document.querySelectorAll("button[data-action]").forEach(btn=>{
