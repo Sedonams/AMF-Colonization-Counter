@@ -68,6 +68,8 @@ th{ background:var(--box); }
         <button id="resetCountersBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer; border-bottom:1px solid var(--border);">Reset Counters</button>
         <button id="saveTemplateBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer; border-bottom:1px solid var(--border);">Save Template</button>
         <button id="deleteTemplateBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer; border-bottom:1px solid var(--border);">Delete Template</button>
+        <button id="exportTemplateBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer; border-bottom:1px solid var(--border);">Export Template</button>
+        <button id="importTemplateBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer;">Import Template</button>
         <button id="exportCsvBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer; border-bottom:1px solid var(--border);">Export CSV</button>
         <button id="clearHistoryBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer; border-bottom:1px solid var(--border);">Clear Score History</button>
         <button id="toggleDarkBtn" style="width:100%; text-align:left; border:none; background:transparent; padding:10px 12px; cursor:pointer;">Toggle Dark Mode</button>
@@ -858,6 +860,89 @@ function saveScore(){
   state.sessionStartTime=null; state.sessionEndTime=null; state.paused=false;
   saveState(); render();
 }
+
+/* =======================
+   Export Button Template
+======================= */
+function exportTemplate(){
+  const select = document.getElementById("templateSelect");
+  const name = select.value;
+
+  if(!name || name === "__default__"){
+    alert("Please select a template to export.");
+    return;
+  }
+
+  const templates = loadTemplates();
+  const template = templates.find(t => t.name === name);
+  if(!template){
+    alert("Template not found.");
+    return;
+  }
+
+  const blob = new Blob(
+    [JSON.stringify(template, null, 2)],
+    { type: "application/json" }
+  );
+
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `${name.replace(/\s+/g,"_")}_template.json`;
+  a.click();
+}
+document.getElementById("exportTemplateBtn")
+  .addEventListener("click", exportTemplate);
+
+/* =======================
+   Import Button Template
+======================= */
+
+function importTemplate(){
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".json,application/json";
+
+  input.onchange = e => {
+    const file = e.target.files[0];
+    if(!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        const imported = JSON.parse(reader.result);
+
+        if(!imported.name || !Array.isArray(imported.counters)){
+          alert("Invalid template file.");
+          return;
+        }
+
+        const templates = loadTemplates();
+        const idx = templates.findIndex(t => t.name === imported.name);
+
+        if(idx !== -1){
+          if(!confirm(`Template "${imported.name}" exists. Overwrite?`)) return;
+          templates[idx] = imported;
+        } else {
+          templates.push(imported);
+        }
+
+        localStorage.setItem(TEMPLATE_KEY, JSON.stringify(templates));
+        renderTemplates();
+        alert(`Template "${imported.name}" imported successfully.`);
+      } catch(err){
+        alert("Failed to read template file.");
+      }
+    };
+
+    reader.readAsText(file);
+  };
+
+  input.click();
+}
+
+document.getElementById("importTemplateBtn")
+  .addEventListener("click", importTemplate);
+
 
 /* =======================
    Export CSV
