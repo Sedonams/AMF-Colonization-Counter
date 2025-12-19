@@ -394,12 +394,12 @@ function playMilestoneSound(){
     { freq: 588.00, duration: 0.24 },  // D5 your
     { freq: 524.00, duration: 1.00 },  // C5 hand
   // Final phrase - arpeggio
-    { freq: 524.00, duration: 0.01 },  // C5 
-    { freq: 588.00, duration: 0.01 },  // D5
-    { freq: 524.00, duration: 0.01 },  // C5 
-    { freq: 588.00, duration: 0.01 },  // D5
-    { freq: 524.00, duration: 0.01 },  // C5 
-    { freq: 588.00, duration: 0.01 },  // D5
+    { freq: 524.00, duration: 0.02 },  // C5 
+    { freq: 588.00, duration: 0.02 },  // D5
+    { freq: 524.00, duration: 0.02 },  // C5 
+    { freq: 588.00, duration: 0.02 },  // D5
+    { freq: 524.00, duration: 0.02 },  // C5 
+    { freq: 588.00, duration: 0.02 },  // D5
     { freq: 523, duration: 0.3 },  // C
     { freq: 392, duration: 0.3 },  // G
     { freq: 330, duration: 0.3 },  // E
@@ -742,10 +742,6 @@ function renderFull(){
     box.style.color=textColorForBg(c.color||"#f4f4f6");
     const textColor = textColorForBg(c.color || "#f4f4f6");
     box.style.color = textColor;
-    // Force inputs to match
-    box.querySelectorAll("input").forEach(inp => {
-       inp.style.color = textColor;
-    });
 
     // Drag & drop
     box.addEventListener("dragstart",e=>{ e.dataTransfer.setData("text/plain",String(idx)); box.style.opacity="0.5"; });
@@ -763,6 +759,11 @@ function renderFull(){
     });
 
     box.innerHTML=`
+      // Force input text color AFTER elements exist
+       box.querySelectorAll("input").forEach(inp => {
+          inp.style.color = textColor;
+       });
+
       <div class="counter-top">
         <input class="counter-name" data-idx="${idx}" value="${c.name}" />
         <input type="color" value="${c.color||'#f4f4f6'}" data-idx="${idx}" class="counter-color-picker" title="Choose counter color"/>
@@ -786,11 +787,25 @@ function renderFull(){
     });
   });
   document.querySelectorAll(".counter-color-picker").forEach(pick=>{
-    pick.addEventListener("input",e=>{
-      const i=Number(pick.dataset.idx);
-      state.counters[i].color=pick.value;
-      saveState(); render();
+    pick.addEventListener("input", e => {
+      const i = Number(pick.dataset.idx);
+      const color = pick.value;
+
+      // Update state
+      state.counters[i].color = color;
+      saveState();
+
+      // Update visuals ONLY (no re-render)
+      const box = pick.closest(".counter-box");
+      box.style.backgroundColor = color;
+
+      const textColor = textColorForBg(color);
+      box.style.color = textColor;
+      box.querySelectorAll("input").forEach(inp => {
+        inp.style.color = textColor;
+      });
     });
+
   });
   document.querySelectorAll(".counter-color-picker").forEach(pick => {
     pick.addEventListener("mousedown", e => {
