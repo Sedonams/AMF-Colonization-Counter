@@ -783,14 +783,13 @@ function renderFull(){
     <button class="small" data-action="del" data-idx="${idx}">Delete</button>
   </div>
 `;
-    countersDiv.appendChild(box);
-  });
-
-  // Force input text color AFTER elements exist
+// Force input text color AFTER elements exist
 box.querySelectorAll("input").forEach(inp => {
   inp.style.color = textColor;
 });
 
+    countersDiv.appendChild(box);
+  });
 
   document.querySelectorAll(".counter-name").forEach(inp=>{
     inp.addEventListener("change",e=>{
