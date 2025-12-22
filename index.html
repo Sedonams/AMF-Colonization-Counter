@@ -959,17 +959,13 @@ function saveScore(){
    Export Button Template
 ======================= */
 document.getElementById("exportTemplateBtn").addEventListener("click", () => {
-  if (!state.counters || state.counters.length === 0) {
-    alert("Nothing to export.");
+  const templates = loadTemplates();
+  const template = templates.find(t => t.name === currentTemplateName);
+
+  if (!template) {
+    alert("No template to export.");
     return;
   }
-
-  const template = {
-    name: currentTemplateName || "Unnamed Template",
-    counters: state.counters,
-    keyPreset: state.keyPreset || null,
-    exportedAt: new Date().toISOString()
-  };
 
   const blob = new Blob(
     [JSON.stringify(template, null, 2)],
@@ -978,11 +974,11 @@ document.getElementById("exportTemplateBtn").addEventListener("click", () => {
 
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = `${template.name.replace(/\s+/g, "_")}.json`;
+  a.download = `${currentTemplateName.replace(/\s+/g, "_")}.json`;
   a.click();
-
   URL.revokeObjectURL(a.href);
 });
+
 
 /* =======================
    Import Button Template
@@ -1206,16 +1202,25 @@ document.getElementById("templateSelect").addEventListener("change",()=>{
   }
   loadTemplate(name);
 });
-document.getElementById("deleteTemplateBtn").addEventListener("click",()=>{
-  const select = document.getElementById("templateSelect");
-  if(!select) return;
-  const name = select.value;
-  if(!name){ alert("No template selected."); return; }
-  if(!confirm(`Delete template "${name}"? This cannot be undone.`)) return;
-  const templates = loadTemplates().filter(t=>t.name!==name);
-  localStorage.setItem(TEMPLATE_KEY, JSON.stringify(templates));
-  renderTemplates();
+
+document.getElementById("deleteTemplateBtn").addEventListener("click", () => {
+  if (currentTemplateName === "__default__") {
+    alert("The default template cannot be deleted.");
+    return;
+  }
+
+  if (!confirm(`Delete template "${currentTemplateName}"? This cannot be undone.`)) {
+    return;
+  }
+
+  let templates = loadTemplates();
+  templates = templates.filter(t => t.name !== currentTemplateName);
+  saveTemplates(templates);
+
+  currentTemplateName = "__default__";
+  applyDefaultTemplate();
 });
+
 
 document.getElementById("addCounterBtn").addEventListener("click",()=>addCounter());
 document.getElementById("deleteCounterBtn").addEventListener("click",()=>deleteLast());
