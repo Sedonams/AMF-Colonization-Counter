@@ -958,27 +958,6 @@ function saveScore(){
 /* =======================
    Export Button Template
 ======================= */
-function exportTemplate(){
-  const select = document.getElementById("templateSelect");
-  const name = select.value;
-
-  const templates = loadTemplates();
-  const template = templates.find(t => t.name === name);
-  if(!template){
-    alert("Template not found.");
-    return;
-  }
-
-  const blob = new Blob(
-    [JSON.stringify(template, null, 2)],
-    { type: "application/json" }
-  );
-
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = `${name.replace(/\s+/g,"_")}_template.json`;
-  a.click();
-}
 document.getElementById("exportTemplateBtn").addEventListener("click", () => {
   if (!state.counters || state.counters.length === 0) {
     alert("Nothing to export.");
