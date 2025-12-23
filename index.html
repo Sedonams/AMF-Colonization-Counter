@@ -208,6 +208,8 @@ let state = {
   majorMilestoneReached: false
 };
 
+let currentTemplateName = "__default__";
+
 /* =======================
    Load/Save State
 ======================= */
@@ -271,6 +273,7 @@ function loadTemplate(name){
   state.counters = t.counters.map(entry => ({ name: entry.name, value: 0, color: entry.color || "" }));
   state.sessionStartTime=null;
   state.sessionEndTime=null;
+  currentTemplateName = name;
   saveState(); render();
 }
 
@@ -1174,12 +1177,17 @@ document.getElementById("saveTemplateBtn").addEventListener("click",()=>{
     if(!confirm(`Template "${name}" exists. Overwrite?`)) return;
   }
   saveTemplate(name);
+  currentTemplateName = name;
+  renderTemplates();
+
 });
 // Load template when the user selects one from the dropdown
 document.getElementById("templateSelect").addEventListener("change",()=>{
   const select = document.getElementById("templateSelect");
   if(!select) return;
   const name = select.value;
+currentTemplateName = name; // ✅ THIS WAS MISSING
+
   if(!name){ return; }
   // Special-case the built-in default template
   if(name === "__default__"){
