@@ -1212,7 +1212,7 @@ currentTemplateName = name; // ✅ THIS WAS MISSING
 });
 
 document.getElementById("deleteTemplateBtn").addEventListener("click", () => {
-  if (currentTemplateName === "__default__") {
+  if (!currentTemplateName || currentTemplateName === "__default__") {
     alert("The default template cannot be deleted.");
     return;
   }
@@ -1221,13 +1221,23 @@ document.getElementById("deleteTemplateBtn").addEventListener("click", () => {
     return;
   }
 
+  // 1️⃣ Load
   let templates = loadTemplates();
+
+  // 2️⃣ Filter out deleted template
   templates = templates.filter(t => t.name !== currentTemplateName);
+
+  // 3️⃣ Save back to storage
   saveTemplates(templates);
 
+  // 4️⃣ Reset active template
   currentTemplateName = "__default__";
+
+  // 5️⃣ Refresh UI
+  renderTemplates();
   applyDefaultTemplate();
 });
+
 
 
 document.getElementById("addCounterBtn").addEventListener("click",()=>addCounter());
