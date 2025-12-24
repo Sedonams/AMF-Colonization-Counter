@@ -100,6 +100,7 @@ th{ background:var(--box); }
     <select id="templateSelect"
       style="padding:6px 8px; border-radius:8px; border:1px solid var(--border);
              background:var(--box); color:var(--text); cursor:pointer;">
+      <option value="" disabled selected hidden>Select Template</option>
     </select>
 
     <button id="toggleModeBtn">Toggle Minimal Mode</button>
@@ -250,7 +251,11 @@ function saveState(){
 /* =======================
    Templates
 ======================= */
-function loadTemplates(){ const raw=localStorage.getItem(TEMPLATE_KEY); return raw?JSON.parse(raw):[]; }
+function loadTemplates(){ 
+  const raw=localStorage.getItem(TEMPLATE_KEY); 
+  return raw?JSON.parse(raw):[]; 
+  return JSON.parse(localStorage.getItem("amf_templates") || "[]");
+}
 function saveTemplate(name){
   if(!name) return;
   const templates=loadTemplates();
@@ -261,11 +266,11 @@ function saveTemplate(name){
   } else {
     templates.push(entry);
   }
-  localStorage.setItem(TEMPLATE_KEY, JSON.stringify(templates));
+  localStorage.setItem("amf_templates", JSON.stringify(templates));
   renderTemplates();
   alert(`Template "${name}" saved.`);
 }
-function loadTemplate(name){
+function loadTemplates(name){
   const templates=loadTemplates();
   const t=templates.find(x=>x.name===name);
   if(!t) return;
@@ -280,24 +285,24 @@ function loadTemplate(name){
 // Populate the templates dropdown
 function renderTemplates(){
   const select = document.getElementById("templateSelect");
-  if(!select) return;
+  select.innerHTML = `
+    <option value="" disabled hidden>Select Template</option>
+  `;
+
   const templates = loadTemplates();
-  select.innerHTML = "";
 
-  // Always offer the built-in default template as the first option
-  const defaultOpt = document.createElement('option');
-  defaultOpt.value = "__default__";
-  defaultOpt.textContent = "Select Template";
-  select.appendChild(defaultOpt);
-
-  if(!templates || !templates.length){
-    const opt = document.createElement('option'); opt.value=""; opt.textContent="(no saved templates)"; opt.disabled = true; select.appendChild(opt);
-    return;
-  }
-  templates.forEach(t=>{
-    const opt = document.createElement('option'); opt.value=t.name; opt.textContent=t.name; select.appendChild(opt);
+  templates.forEach(t => {
+    const opt = document.createElement("option");
+    opt.value = t.name;
+    opt.textContent = t.name;
+    select.appendChild(opt);
   });
+
+  if (currentTemplateName && currentTemplateName !== "__default__") {
+    select.value = currentTemplateName;
+  }
 }
+
 
 /* =======================
    Custom Key Presets
@@ -1208,7 +1213,7 @@ currentTemplateName = name; // ✅ THIS WAS MISSING
     renderTemplates();
     return;
   }
-  loadTemplate(name);
+  loadTemplates(name);
 });
 
 document.getElementById("deleteTemplateBtn").addEventListener("click", () => {
@@ -1221,23 +1226,19 @@ document.getElementById("deleteTemplateBtn").addEventListener("click", () => {
     return;
   }
 
-  // 1️⃣ Load
   let templates = loadTemplates();
+  console.log("Before delete:", templates.map(t => t.name));
 
-  // 2️⃣ Filter out deleted template
   templates = templates.filter(t => t.name !== currentTemplateName);
 
-  // 3️⃣ Save back to storage
+  console.log("After delete:", templates.map(t => t.name));
+
   saveTemplates(templates);
 
-  // 4️⃣ Reset active template
   currentTemplateName = "__default__";
-
-  // 5️⃣ Refresh UI
   renderTemplates();
   applyDefaultTemplate();
 });
-
 
 
 document.getElementById("addCounterBtn").addEventListener("click",()=>addCounter());
