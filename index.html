@@ -66,35 +66,40 @@ th{ background:var(--box); }
 
   <div class="toolbar">
 
-    <!-- Key preset selector -->
-    <select id="keyPresetSelect"
-      style="padding:6px 8px; border-radius:8px; border:1px solid var(--border);
-             background:var(--box); color:var(--text); cursor:pointer;">
-      <option value="Four Rows of Four">Four Rows of Four</option>
-      <option value="Q through M">Q through M</option>
-      <option value="Function Keys (F1-3)">Function Keys (F1-3)</option>
-      <option value="Choose Your Own">Choose Your Own</option>
-    </select>
+  <!-- Key preset select -->
+  <select id="keyPresetSelect">
+    <option value="Four Rows of Four">Four Rows of Four</option>
+    <option value="Q through M">Q through M</option>
+    <option value="Function Keys (F1-3)">Function Keys (F1-3)</option>
+    <option value="Choose Your Own">Choose Your Own</option>
+  </select>
 
-    <!-- Template menu -->
-    <div style="position:relative; display:inline-block;">
-      <button id="templateMenuBtn" style="padding:8px 10px; border-radius:8px;">
-        ⚙ Button Template Options
-      </button>
+  <!-- Button Template dropdown -->
+  <div style="position:relative; display:inline-block;">
+    <button id="templateMenuBtn">⚙ Button Template Options</button>
 
-      <div id="templateDropdown"
-        style="display:none; position:absolute; top:100%; right:0;
-               background:var(--box); border:1px solid var(--border);
-               border-radius:8px; min-width:200px;
-               box-shadow:0 2px 8px rgba(0,0,0,0.2);
-               z-index:100; margin-top:4px;">
+    <div id="templateDropdown"
+      style="display:none;
+             position:absolute;
+             top:100%;
+             right:0;
+             background:var(--box);
+             border:1px solid var(--border);
+             border-radius:8px;
+             min-width:200px;
+             z-index:100;
+             margin-top:4px;">
 
-        <button id="saveTemplateBtn">Save Template</button>
-        <button id="deleteTemplateBtn">Delete Template</button>
-        <button id="exportTemplateBtn">Export Template</button>
-        <button id="importTemplateBtn">Import Template</button>
-      </div>
+      <button id="saveTemplateBtn">Save Template</button>
+      <button id="deleteTemplateBtn">Delete Template</button>
+      <button id="exportTemplateBtn">Export Template</button>
+      <button id="importTemplateBtn">Import Template</button>
+
     </div>
+  </div>
+
+</div>
+
 
     <!-- Template selector -->
     <select id="templateSelect"
@@ -1283,16 +1288,14 @@ const templateDropdown = document.getElementById("templateDropdown");
 
 templateMenuBtn.addEventListener("click", e => {
   e.stopPropagation();
-  const isVisible = templateDropdown.style.display !== "none";
-  templateDropdown.style.display = isVisible ? "none" : "block";
+  templateDropdown.style.display =
+    templateDropdown.style.display === "block" ? "none" : "block";
 });
 
-// Close dropdown when clicking outside
-document.addEventListener("click", e => {
-  if(!templateMenuBtn.contains(e.target) && !templateDropdown.contains(e.target)){
-    templateDropdown.style.display = "none";
-  }
+document.addEventListener("click", () => {
+  templateDropdown.style.display = "none";
 });
+
 
 // Close dropdown after selecting an option
 templateDropdown.querySelectorAll("button").forEach(btn => {
