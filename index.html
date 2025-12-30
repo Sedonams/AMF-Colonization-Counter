@@ -64,41 +64,37 @@ th{ background:var(--box); }
     </div>
   </div>
 
+ <header>
   <div class="toolbar">
 
-  <!-- Key preset select -->
-  <select id="keyPresetSelect">
-    <option value="Four Rows of Four">Four Rows of Four</option>
-    <option value="Q through M">Q through M</option>
-    <option value="Function Keys (F1-3)">Function Keys (F1-3)</option>
-    <option value="Choose Your Own">Choose Your Own</option>
-  </select>
+    <select id="keyPresetSelect">
+      <option value="Four Rows of Four">Four Rows of Four</option>
+      <option value="Q through M">Q through M</option>
+      <option value="Function Keys (F1-3)">Function Keys (F1-3)</option>
+      <option value="Choose Your Own">Choose Your Own</option>
+    </select>
 
-  <!-- Button Template dropdown -->
-  <div style="position:relative; display:inline-block;">
-    <button id="templateMenuBtn">⚙ Button Template Options</button>
+    <div style="position:relative; display:inline-block;">
+      <button id="templateMenuBtn">⚙ Button Template Options</button>
 
-    <div id="templateDropdown"
-      style="display:none;
-             position:absolute;
-             top:100%;
-             right:0;
-             background:var(--box);
-             border:1px solid var(--border);
-             border-radius:8px;
-             min-width:200px;
-             z-index:100;
-             margin-top:4px;">
-
-      <button id="saveTemplateBtn">Save Template</button>
-      <button id="deleteTemplateBtn">Delete Template</button>
-      <button id="exportTemplateBtn">Export Template</button>
-      <button id="importTemplateBtn">Import Template</button>
-
+      <div id="templateDropdown" style="display:none; position:absolute; top:100%; right:0;">
+        <button id="saveTemplateBtn">Save Template</button>
+        <button id="deleteTemplateBtn">Delete Template</button>
+        <button id="exportTemplateBtn">Export Template</button>
+        <button id="importTemplateBtn">Import Template</button>
+      </div>
     </div>
-  </div>
 
-</div>
+    <select id="templateSelect">
+      <option value="" disabled selected hidden>Select Template</option>
+    </select>
+
+    <button id="toggleModeBtn">Toggle Minimal Mode</button>
+    <button id="saveScoreBtn">Save Score</button>
+
+  </div>
+</header>
+
 
 
     <!-- Template selector -->
@@ -198,7 +194,7 @@ const DEFAULT_COUNTERS = [
   { name: "Fine_endo", color: "#0d0d87" }
 ];
 const STORAGE_KEY = "radical_AMF_counter_v2";
-const TEMPLATE_KEY = "radical_AMF_templates_v2";
+const TEMPLATE_KEY = "radical_TEMPLATE_KEY_v2";
 const HISTORY_KEY = "radical_AMF_history_v2";
 const CUSTOM_KEY_PRESETS_KEY = "radical_AMF_custom_key_presets_v1";
 
@@ -259,7 +255,7 @@ function saveState(){
 function loadTemplates(){ 
   const raw=localStorage.getItem(TEMPLATE_KEY); 
   return raw?JSON.parse(raw):[]; 
-  return JSON.parse(localStorage.getItem("amf_templates") || "[]");
+  return JSON.parse(localStorage.getItem("TEMPLATE_KEY") || "[]");
 }
 function saveTemplate(name){
   if(!name) return;
@@ -271,11 +267,11 @@ function saveTemplate(name){
   } else {
     templates.push(entry);
   }
-  localStorage.setItem("amf_templates", JSON.stringify(templates));
+  localStorage.setItem("TEMPLATE_KEY", JSON.stringify(templates));
   renderTemplates();
   alert(`Template "${name}" saved.`);
 }
-function loadTemplates(name){
+function applyTemplate(name){
   const templates=loadTemplates();
   const t=templates.find(x=>x.name===name);
   if(!t) return;
@@ -1218,7 +1214,7 @@ currentTemplateName = name; // ✅ THIS WAS MISSING
     renderTemplates();
     return;
   }
-  loadTemplates(name);
+  applyTemplate(name);
 });
 
 document.getElementById("deleteTemplateBtn").addEventListener("click", () => {
@@ -1238,7 +1234,7 @@ document.getElementById("deleteTemplateBtn").addEventListener("click", () => {
 
   console.log("After delete:", templates.map(t => t.name));
 
-  saveTemplates(templates);
+  localStorage.setItem(TEMPLATE_KEY, JSON.stringify(templates));
 
   currentTemplateName = "__default__";
   renderTemplates();
