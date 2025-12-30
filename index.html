@@ -66,8 +66,9 @@ th{ background:var(--box); }
 
  <header>
   <div class="toolbar">
-
-    <select id="keyPresetSelect">
+    <select id="keyPresetSelect"
+            style="padding:8px 10px; border-radius:8px; border:1px solid var(--border);
+             background:var(--box); color:var(--text); cursor:pointer;">
       <option value="Four Rows of Four">Four Rows of Four</option>
       <option value="Q through M">Q through M</option>
       <option value="Function Keys (F1-3)">Function Keys (F1-3)</option>
@@ -92,14 +93,9 @@ th{ background:var(--box); }
     <button id="toggleModeBtn">Toggle Minimal Mode</button>
     <button id="saveScoreBtn">Save Score</button>
 
-  </div>
-</header>
-
-
-
     <!-- Template selector -->
     <select id="templateSelect"
-      style="padding:6px 8px; border-radius:8px; border:1px solid var(--border);
+      style="padding:8px 10px; border-radius:8px; border:1px solid var(--border);
              background:var(--box); color:var(--text); cursor:pointer;">
       <option value="" disabled selected hidden>Select Template</option>
     </select>
