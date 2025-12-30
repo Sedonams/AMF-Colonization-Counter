@@ -1188,35 +1188,6 @@ document.getElementById("saveTemplateBtn").addEventListener("click",()=>{
   renderTemplates();
 
 });
-// Load template when the user selects one from the dropdown
-document.getElementById("templateSelect").addEventListener("change",()=>{
-  const select = document.getElementById("templateSelect");
-  if(!select) return;
-  const name = select.value;
-currentTemplateName = name; // ✅ THIS WAS MISSING
-
-  if(!name){ return; }
-  // Special-case the built-in default template
-  if(name === "__default__"){
-    if(!confirm(`Load default template? This will reset current counters.`)){
-      renderTemplates();
-      return;
-    }
-    state.counters = DEFAULT_COUNTERS.map(c => ({ name: c.name, value: 0, color: c.color || "" }));
-    state.sessionStartTime = null;
-    state.sessionEndTime = null;
-    state.paused = false;
-    saveState();
-    render();
-    return;
-  }
-  if(!confirm(`Load template "${name}"? This will reset current counters.`)){
-    // revert selection to no-op (optional)
-    renderTemplates();
-    return;
-  }
-  applyTemplate(name);
-});
 
 document.getElementById("deleteTemplateBtn").addEventListener("click", () => {
   if (!currentTemplateName || currentTemplateName === "__default__") {
