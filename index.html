@@ -86,20 +86,6 @@ th{ background:var(--box); }
       </div>
     </div>
 
-    <select id="templateSelect">
-      <option value="" disabled selected hidden>Select Template</option>
-    </select>
-
-    <button id="toggleModeBtn">Toggle Minimal Mode</button>
-    <button id="saveScoreBtn">Save Score</button>
-
-    <!-- Template selector -->
-    <select id="templateSelect"
-      style="padding:8px 10px; border-radius:8px; border:1px solid var(--border);
-             background:var(--box); color:var(--text); cursor:pointer;">
-      <option value="" disabled selected hidden>Select Template</option>
-    </select>
-
     <button id="toggleModeBtn">Toggle Minimal Mode</button>
     <button id="saveScoreBtn">Save Score</button>
     <button id="pauseTimerBtn">Pause Timer</button>
@@ -281,24 +267,43 @@ function applyTemplate(name){
 
 // Populate the templates dropdown
 function renderTemplates(){
-  const select = document.getElementById("templateSelect");
-  select.innerHTML = `
-    <option value="" disabled hidden>Select Template</option>
+  const menu = document.getElementById("templateDropdown");
+
+  // Clear everything except the static action buttons
+  menu.innerHTML = `
+    <button id="saveTemplateBtn">Save Template</button>
+    <button id="deleteTemplateBtn">Delete Template</button>
+    <button id="exportTemplateBtn">Export Template</button>
+    <button id="importTemplateBtn">Import Template</button>
+    <hr style="margin:6px 0;border:none;border-top:1px solid var(--border)">
   `;
 
-  const templates = loadTemplates();
+  // Default template option
+  const defaultBtn = document.createElement("button");
+  defaultBtn.textContent = "Default Template";
+  defaultBtn.onclick = () => {
+    if(!confirm("Load default template? This will reset counters.")) return;
+    state.counters = DEFAULT_COUNTERS.map(c => ({
+      name: c.name, value: 0, color: c.color || ""
+    }));
+    currentTemplateName = "__default__";
+    saveState();
+    render();
+  };
+  menu.appendChild(defaultBtn);
 
-  templates.forEach(t => {
-    const opt = document.createElement("option");
-    opt.value = t.name;
-    opt.textContent = t.name;
-    select.appendChild(opt);
+  // Saved templates
+  loadTemplates().forEach(t => {
+    const btn = document.createElement("button");
+    btn.textContent = t.name;
+    btn.onclick = () => {
+      if(!confirm(`Load template "${t.name}"? This will reset counters.`)) return;
+      applyTemplate(t.name);
+    };
+    menu.appendChild(btn);
   });
-
-  if (currentTemplateName && currentTemplateName !== "__default__") {
-    select.value = currentTemplateName;
-  }
 }
+
 
 
 /* =======================
@@ -1223,19 +1228,15 @@ document.getElementById("deleteTemplateBtn").addEventListener("click", () => {
     return;
   }
 
-  let templates = loadTemplates();
-  console.log("Before delete:", templates.map(t => t.name));
-
-  templates = templates.filter(t => t.name !== currentTemplateName);
-
-  console.log("After delete:", templates.map(t => t.name));
+  let templates = loadTemplates()
+    .filter(t => t.name !== currentTemplateName);
 
   localStorage.setItem(TEMPLATE_KEY, JSON.stringify(templates));
 
   currentTemplateName = "__default__";
   renderTemplates();
-  applyDefaultTemplate();
 });
+
 
 
 document.getElementById("addCounterBtn").addEventListener("click",()=>addCounter());
