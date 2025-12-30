@@ -91,27 +91,34 @@ th{ background:var(--box); }
     <button id="pauseTimerBtn">Pause Timer</button>
 
     <!-- Settings menu -->
-    <div style="position:relative; display:inline-block;">
-      <button id="settingsMenuBtn" style="padding:8px 10px; border-radius:8px; display:none; position:absolute; top:100%; right:0;">
-        ⚙ Settings
-      </button>
+ <div style="position:relative; display:inline-block;">
+  <button id="settingsMenuBtn"
+    style="padding:8px 10px; border-radius:8px;">
+    ⚙ Settings
+  </button>
 
-      <div id="settingsDropdown"
-        style="display:none; position:absolute; top:100%; right:0;
-               background:var(--box); border:1px solid var(--border);
-               border-radius:8px; min-width:200px;
-               box-shadow:0 2px 8px rgba(0,0,0,0.2);
-               z-index:100; margin-top:4px;">
+  <div id="settingsDropdown"
+    style="display:none;
+           position:absolute;
+           top:calc(100% + 6px);
+           right:0;
+           background:var(--box);
+           border:1px solid var(--border);
+           border-radius:8px;
+           min-width:200px;
+           box-shadow:0 2px 8px rgba(0,0,0,0.2);
+           z-index:100; max-height: calc(100vh - 80px);
+  overflow-y: auto;">
 
-        <button id="resetCountersBtn">Reset Counters</button>
-        <button id="exportCsvBtn">Export CSV</button>
-        <button id="appendCsvBtn">Append to CSV</button>
-        <button id="clearHistoryBtn">Clear Score History</button>
-        <button id="toggleDarkBtn">Toggle Dark Mode</button>
-        <button onclick="playMilestoneSound()">Play Moon Beam</button>
-        <button onclick="playMajorMilestoneSound()">Play Festival</button>
-      </div>
-    </div>
+    <button id="resetCountersBtn">Reset Counters</button>
+    <button id="exportCsvBtn">Export CSV</button>
+    <button id="appendCsvBtn">Append to CSV</button>
+    <button id="clearHistoryBtn">Clear Score History</button>
+    <button id="toggleDarkBtn">Toggle Dark Mode</button>
+    <button onclick="playMilestoneSound()">Play Moon Beam</button>
+    <button onclick="playMajorMilestoneSound()">Play Festival</button>
+  </div>
+ </div>
 
   </div>
 </header>
