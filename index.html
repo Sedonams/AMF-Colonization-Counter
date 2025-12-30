@@ -67,8 +67,17 @@ th{ background:var(--box); }
  <header>
   <div class="toolbar">
     <select id="keyPresetSelect"
-            style="padding:8px 10px; border-radius:8px; border:1px solid var(--border);
-             background:var(--box); color:var(--text); cursor:pointer;">
+            style="display:none;
+           position:absolute;
+           top:calc(100% + 6px);
+           right:0;
+           background:var(--box);
+           border:1px solid var(--border);
+           border-radius:8px;
+           min-width:200px;
+           box-shadow:0 2px 8px rgba(0,0,0,0.2);
+           z-index:100; max-height: calc(100vh - 80px);
+           overflow-y: auto;">
       <option value="Four Rows of Four">Four Rows of Four</option>
       <option value="Q through M">Q through M</option>
       <option value="Function Keys (F1-3)">Function Keys (F1-3)</option>
@@ -108,7 +117,7 @@ th{ background:var(--box); }
            min-width:200px;
            box-shadow:0 2px 8px rgba(0,0,0,0.2);
            z-index:100; max-height: calc(100vh - 80px);
-  overflow-y: auto;">
+           overflow-y: auto;">
 
     <button id="resetCountersBtn">Reset Counters</button>
     <button id="exportCsvBtn">Export CSV</button>
