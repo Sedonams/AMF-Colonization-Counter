@@ -414,24 +414,13 @@ function playMilestoneSound(){
     { freq: 587.33, duration: 0.48 },  // D5 beam
     { freq: 524.00, duration: 0.24 },  // C5 in
     { freq: 587.33, duration: 0.24 },  // D5 your
-    { freq: 524.00, duration: 1.00 },  // C5 hand
-  // Final phrase - arpeggio
-    { freq: 524.00, duration: 0.1 },  // C5 
-    { freq: 587.33, duration: 0.1 },  // D5
-    { freq: 523.25, duration: 0.1 },  // C5 
-    { freq: 587.33, duration: 0.1 },  // D5
-    { freq: 524.00, duration: 0.1 },  // C5 
-    { freq: 587.33, duration: 0.1 },  // D5
-    { freq: 523.25, duration: 0.3 },  // C
-    { freq: 392, duration: 0.3 },  // G
-    { freq: 330, duration: 0.3 },  // E
-    { freq: 524, duration: 0.5 }   // C (final, held long)
+    { freq: 524.00, duration: 1.00 }  // C5 hand
 ];
   
   const gain = ctx.createGain();
   gain.connect(ctx.destination);
   // Increase initial gain so the melody is louder (user requested higher volume)
-  gain.gain.setValueAtTime(1.5, now);
+  gain.gain.setValueAtTime(1, now);
   
   let time = now;
   notes.forEach(note => {
