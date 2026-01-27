@@ -464,17 +464,7 @@ function playMajorMilestoneSound(){
     // Third phrase - triumphant
     { freq: 523, duration: 0.4 },  // C5
     { freq: 494, duration: 0.2 },  // B4
-    { freq: 659.26, duration: 1.4 },  // E5 (high)
-    // Final phrase - arpeggio
-    { freq: 494, duration: 0.2 },  // B4
-    { freq: 523, duration: 0.4 },  // C5
-    { freq: 440, duration: 0.3 },  // A4
-    { freq: 523, duration: 0.3 },  // C (high)
-    { freq: 587, duration: 0.3 },  // D
-    { freq: 523, duration: 0.3 },  // C
-    { freq: 392, duration: 0.3 },  // G
-    { freq: 330, duration: 0.3 },  // E
-    { freq: 262, duration: 2.5 }   // C (final, held long)
+    { freq: 659.26, duration: 1.4 }  // E5 (high)
   ];
   
   const gain = ctx.createGain();
@@ -934,7 +924,6 @@ function incrementAt(i){
 }
 function decrementAt(i){ if(!state.counters[i]) return; state.counters[i].value=Math.max(0,(Number(state.counters[i].value)||0)-1); if(!state.paused) state.sessionEndTime=Date.now(); saveState(); render(); speak(`${state.counters[i].value} ${state.counters[i].name}`); }
 function addCounter(){ if(state.counters.length>=MAX_COUNTERS){ alert(`Maximum ${MAX_COUNTERS} counters reached.`); return; } const idx=state.counters.length; state.counters.push({name:`Counter ${idx+1}`,value:0,color:""}); saveState(); render(); }
-function deleteLast(){ if(state.counters.length===0) return; if(!confirm("Delete last counter? Keys shift.")) return; state.counters.pop(); saveState(); render(); }
 function resetCounters(){
   if(!confirm("Reset all counters and session timing?")) return;
   state.counters.forEach(c=>c.value=0);
@@ -1212,7 +1201,6 @@ document.getElementById("deleteTemplateBtn").addEventListener("click", () => {
 
 
 document.getElementById("addCounterBtn").addEventListener("click",()=>addCounter());
-document.getElementById("deleteCounterBtn").addEventListener("click",()=>deleteLast());
 
 document.getElementById("keyPresetSelect").addEventListener("change",e=>{
   const preset=e.target.value;
