@@ -80,14 +80,14 @@ th{ background:var(--box); }
       <option value="Choose Your Own">Choose Your Own</option>
     </select>
 
-    <div style="padding:8px 10px; border-radius:8px; border:1px solid var(--border);
+    <div style="position:relative; display:inline-block;">
+      <button id="templateMenuBtn">Button Template Options</button style="padding:8px 10px; border-radius:8px; border:1px solid var(--border);
            background:var(--box); color:var(--text); cursor:pointer;top:calc(100% + 6px);
            right:0;
            min-width:200px;
            box-shadow:0 2px 8px rgba(0,0,0,0.2);
            z-index:100; max-height: calc(100vh - 80px);
            overflow-y: auto;">
-      <button id="templateMenuBtn">Button Template Options</button>
 
       <div id="templateDropdown" style="display:none; position:absolute; top:100%; right:0;">
         <button id="saveTemplateBtn">Save Template</button>
