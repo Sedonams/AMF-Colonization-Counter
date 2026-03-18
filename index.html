@@ -110,7 +110,6 @@ tr.selected-row td{ background:rgba(74,125,58,0.15); outline:2px solid #4a7d3a; 
     <div style="position:relative;display:inline-block;">
       <button id="toolsMenuBtn">&#128295; Tools</button>
       <div id="toolsDropdown" class="dropdown-panel">
-        <button id="addCounterBtn">&#10010; Add Counter</button>
         <button id="resetCountersBtn">&#8635; Reset Counters</button>
         <hr>
         <button id="exportCsvBtn">&#128229; Export CSV</button>
@@ -249,16 +248,6 @@ function renderTemplates(){
     <button id="importTemplateBtn">&#128229; Import Template</button>
     <hr>
   `;
-
-  const defaultBtn=document.createElement("button");
-  defaultBtn.textContent="\u21A9 Default Template";
-  defaultBtn.onclick=()=>{
-    if(!confirm("Load default template? This will reset counters.")) return;
-    state.counters=DEFAULT_COUNTERS.map(c=>({name:c.name,value:0,color:c.color||""}));
-    currentTemplateName="__default__";
-    saveState(); render(); menu.style.display="none";
-  };
-  menu.appendChild(defaultBtn);
 
   loadTemplates().forEach(t=>{
     const btn=document.createElement("button");
@@ -569,6 +558,15 @@ function renderFull(){
     box.querySelectorAll("input").forEach(i=>i.style.color=tc);
     countersDiv.appendChild(box);
   });
+  // Add Counter tile
+const addTile = document.createElement("div");
+addTile.className = "counter-box";
+addTile.style.cssText = "display:inline-flex;align-items:center;justify-content:center;flex-direction:column;cursor:pointer;border-style:dashed;opacity:0.6;";
+addTile.innerHTML = `<div style="font-size:36px;line-height:1;">+</div><div style="font-size:12px;margin-top:6px;">Add Counter</div>`;
+addTile.title = "Add a new counter";
+addTile.onclick = addCounter;
+countersDiv.appendChild(addTile);
+
   document.querySelectorAll(".counter-name").forEach(inp=>inp.addEventListener("change",()=>{ const i=Number(inp.dataset.idx); state.counters[i].name=inp.value.trim()||`Counter ${i+1}`; saveState(); render(); }));
   document.querySelectorAll(".counter-color-picker").forEach(pick=>{
     pick.addEventListener("input",()=>{ const i=Number(pick.dataset.idx),col=pick.value; state.counters[i].color=col; saveState(); const bx=pick.closest(".counter-box"); bx.style.backgroundColor=col; const tc2=textColorForBg(col); bx.style.color=tc2; bx.querySelectorAll("input").forEach(x=>x.style.color=tc2); });
@@ -841,7 +839,6 @@ document.getElementById("saveScoreBtn").addEventListener("click",saveScore);
 document.getElementById("exportCsvBtn").addEventListener("click",exportCSV);
 document.getElementById("appendCsvBtn").addEventListener("click",appendToCSV);
 document.getElementById("clearHistoryBtn").addEventListener("click",clearHistory);
-document.getElementById("addCounterBtn").addEventListener("click",addCounter);
 document.getElementById("pauseTimerBtn").addEventListener("click",()=>{
   state.paused=!state.paused;
   if(state.paused) state.sessionEndTime=Date.now();
