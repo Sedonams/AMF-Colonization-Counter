@@ -12,7 +12,7 @@ body.dark{ --bg:#07070a; --text:#eee; --box:#121216; --border:#333; }
 body{ background:var(--bg); color:var(--text); font-family:Inter,Segoe UI,Arial,sans-serif; margin:0; padding:18px; transition:background .2s,color .2s; }
 header{ display:flex; flex-wrap:wrap; align-items:center; gap:16px; margin-bottom:12px; }
 h1{ font-size:28px; margin:0; font-family:'Lobster', cursive; }
-.toolbar{ display:flex; gap:8px; flex-wrap:wrap; margin-left:auto; }
+.toolbar{ display:flex; gap:8px; flex-wrap:wrap; margin-left:auto; align-items:center; }
 button{ background:var(--box); color:var(--text); border:1px solid var(--border); padding:8px 10px; border-radius:8px; cursor:pointer; }
 button:active{ transform:translateY(1px); }
 #totalCountContainer{ margin:10px 0; }
@@ -24,18 +24,9 @@ button:active{ transform:translateY(1px); }
 .counter-top{ display:flex; justify-content:space-between; align-items:center; gap:8px; }
 .counter-name{ width:100%; padding:6px; border:1px solid var(--border); border-radius:6px; background:transparent; color:inherit; }
 .counter-box, .counter-box * { color: inherit; }
-.counter-box button {
-  background: rgba(255,255,255,0.85);
-  color: #111;
-  border: 1px solid var(--border);
-}
-body.dark .counter-box button {
-  background: rgba(0,0,0,0.7);
-  color: #eee;
-}
-.counter-box button {
-  backdrop-filter: blur(2px);
-}
+.counter-box button { background:rgba(255,255,255,0.85); color:#111; border:1px solid var(--border); }
+body.dark .counter-box button { background:rgba(0,0,0,0.7); color:#eee; }
+.counter-box button { backdrop-filter:blur(2px); }
 .key-label{ font-size:12px; color:gray; margin-top:6px; }
 .btn-row{ display:flex; gap:8px; margin-top:10px; }
 .small{ padding:6px 8px; font-size:14px; }
@@ -43,13 +34,35 @@ body.dark .counter-box button {
 .minimal-box{ width:140px; min-height:72px; border-radius:10px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:10px; box-sizing:border-box; cursor:pointer; user-select:none; }
 .minimal-label{ font-size:13px; margin-bottom:6px; text-align:center; word-break:break-word; }
 .minimal-number{ font-size:28px; font-weight:700; }
-.empty-slot{ width:140px; height:72px; border-radius:10px; border:1px dashed var(--border); display:flex;align-items:center;justify-content:center;color:gray; }
+.empty-slot{ width:140px; height:72px; border-radius:10px; border:1px dashed var(--border); display:flex; align-items:center; justify-content:center; color:gray; }
 .drag-hint{ font-size:12px; color:gray; margin-left:6px; }
 .add-delete{ display:flex; gap:6px; margin-top:8px; }
 .danger{ border-color:#e08a8a; }
-table{ border-collapse:collapse; margin-top:12px; width:100%; max-width:1200px; }
-th,td{ border:1px solid var(--border); padding:4px 8px; text-align:center; }
-th{ background:var(--box); }
+
+/* History table with frozen header */
+#historyContainer{ margin-top:16px; }
+#historyTableWrapper{ max-height:320px; overflow-y:auto; border:1px solid var(--border); border-radius:8px; max-width:1200px; }
+table{ border-collapse:collapse; width:100%; margin-top:0; }
+th,td{ border:1px solid var(--border); padding:4px 8px; text-align:center; white-space:nowrap; }
+th{ background:var(--box); position:sticky; top:0; z-index:2; }
+tr.selected-row td{ background:rgba(74,125,58,0.15); outline:2px solid #4a7d3a; outline-offset:-1px; }
+
+/* Shared dropdown panel */
+.dropdown-panel{
+  display:none; position:absolute; top:calc(100% + 6px); right:0;
+  background:var(--box); border:1px solid var(--border); border-radius:8px;
+  min-width:210px; box-shadow:0 2px 10px rgba(0,0,0,0.2);
+  z-index:100; max-height:calc(100vh - 80px); overflow-y:auto;
+}
+.dropdown-panel button{
+  display:block; width:100%; text-align:left;
+  padding:10px 14px; border:none; border-radius:0;
+  background:transparent; cursor:pointer; color:var(--text);
+}
+.dropdown-panel button:hover{ background:rgba(128,128,128,0.15); }
+.dropdown-panel hr{ margin:4px 0; border:none; border-top:1px solid var(--border); }
+.panel-divider{ padding:5px 14px 3px; font-size:11px; color:gray; text-transform:uppercase; letter-spacing:.05em; pointer-events:none; border-top:1px solid var(--border); margin-top:4px; }
+
 @media(max-width:800px){ .counter-box{ width:200px; } }
 @media(max-width:520px){ .counter-box{ width:200px; } .minimal-box{ width:48%; } }
 </style>
@@ -59,854 +72,581 @@ th{ background:var(--box); }
 <header>
   <div>
     <h1>A Radical AMF Colonization Counter</h1>
-    <div class="meta" id="keyDisplayMeta">
-      Keys: ` 1 2 3 4 Q W E R A S D F Z X C V
-    </div>
+    <div class="meta" id="keyDisplayMeta">Keys: ` 1 2 3 4 Q W E R A S D F Z X C V</div>
   </div>
 
- <header>
   <div class="toolbar">
-    <select id="keyPresetSelect"
-            style="padding:8px 10px; border-radius:8px; border:1px solid var(--border);
-           background:var(--box); color:var(--text); cursor:pointer;top:calc(100% + 6px);
-           right:0;
-           min-width:200px;
-           box-shadow:0 2px 8px rgba(0,0,0,0.2);
-           z-index:100; max-height: calc(100vh - 80px);
-           overflow-y: auto;">
-      <option value="Four Rows of Four">Four Rows of Four</option>
-      <option value="Q through M">Q through M</option>
-      <option value="Function Keys (F1-3)">Function Keys (F1-3)</option>
-      <option value="Choose Your Own">Choose Your Own</option>
-    </select>
 
-    <div style="position:relative; display:inline-block;">
-      <button id="templateMenuBtn">Button Template Options</button style="padding:8px 10px; border-radius:8px; border:1px solid var(--border);
-           background:var(--box); color:var(--text); cursor:pointer;top:calc(100% + 6px);
-           right:0;
-           min-width:200px;
-           box-shadow:0 2px 8px rgba(0,0,0,0.2);
-           z-index:100; max-height: calc(100vh - 80px);
-           overflow-y: auto;">
+    <!-- Key Presets -->
+    <div style="position:relative;display:inline-block;">
+      <button id="keyPresetMenuBtn">&#127929; Key Presets</button>
+      <div id="keyPresetDropdown" class="dropdown-panel"></div>
+      <select id="keyPresetSelect" style="display:none;">
+        <option value="Four Rows of Four">Four Rows of Four</option>
+        <option value="Q through M">Q through M</option>
+        <option value="Function Keys (F1-3)">Function Keys (F1-3)</option>
+        <option value="Choose Your Own">Choose Your Own</option>
+      </select>
+    </div>
 
-      <div id="templateDropdown" style="display:none; position:absolute; top:100%; right:0;">
-        <button id="saveTemplateBtn">Save Template</button>
-        <button id="deleteTemplateBtn">Delete Template</button>
-        <button id="exportTemplateBtn">Export Template</button>
-        <button id="importTemplateBtn">Import Template</button>
+    <!-- Button Templates -->
+    <div style="position:relative;display:inline-block;">
+      <button id="templateMenuBtn">&#128203; Button Templates</button>
+      <div id="templateDropdown" class="dropdown-panel"></div>
+    </div>
+
+    <!-- Looks & Sounds -->
+    <div style="position:relative;display:inline-block;">
+      <button id="looksMenuBtn">&#127912; Looks &amp; Sounds</button>
+      <div id="looksDropdown" class="dropdown-panel">
+        <button id="toggleDarkBtn">&#127761; Toggle Dark Mode</button>
+        <button id="toggleModeBtn">&#128065; Toggle Minimal Mode</button>
+        <button id="playMoonBeamBtn">&#127925; Play Moon Beam</button>
+        <button id="playFestivalBtn">&#127926; Play Festival</button>
       </div>
     </div>
 
-    <!-- Settings menu -->
- <div style="position:relative; display:inline-block;">
-  <button id="settingsMenuBtn"
-    style="padding:8px 10px; border-radius:8px;">
-    ⚙ Settings
-  </button>
+    <!-- Tools -->
+    <div style="position:relative;display:inline-block;">
+      <button id="toolsMenuBtn">&#128295; Tools</button>
+      <div id="toolsDropdown" class="dropdown-panel">
+        <button id="addCounterBtn">&#10010; Add Counter</button>
+        <button id="resetCountersBtn">&#8635; Reset Counters</button>
+        <hr>
+        <button id="exportCsvBtn">&#128229; Export CSV</button>
+        <button id="appendCsvBtn">&#128196; Append to CSV</button>
+        <button id="clearHistoryBtn">&#128465; Clear Score History</button>
+      </div>
+    </div>
 
-  <div id="settingsDropdown"
-    style="display:none;
-           position:absolute;
-           top:calc(100% + 6px);
-           right:0;
-           background:var(--box);
-           border:1px solid var(--border);
-           border-radius:8px;
-           min-width:200px;
-           box-shadow:0 2px 8px rgba(0,0,0,0.2);
-           z-index:100; max-height: calc(100vh - 80px);
-           overflow-y: auto;">
-
-    <button id="resetCountersBtn">Reset Counters</button>
-    <button id="exportCsvBtn">Export CSV</button>
-    <button id="appendCsvBtn">Append to CSV</button>
-    <button id="clearHistoryBtn">Clear Saved Scores</button>
-    <button id="toggleDarkBtn">Toggle Dark Mode</button>
-    <button onclick="playMilestoneSound()">Play Moon Beam</button>
-    <button onclick="playMajorMilestoneSound()">Play Festival</button>
   </div>
-
-  <button id="toggleModeBtn">Toggle Minimal Mode</button>
-
- </div>
-
-</div>
 </header>
 
 <div id="controlsRow"></div>
 <div id="totalCountContainer">
   <div id="totalCount">Total: 0</div>
-  <div id="timeInfo">Waiting to begin…</div>
+  <div id="timeInfo">Waiting to begin&hellip;</div>
 </div>
-  <div>
-    <button id="saveScoreBtn">Save Score</button>
-    <button id="pauseTimerBtn">Pause Timer</button>
-    <button id="addCounterBtn">Add Counter</button>
-    <span class="drag-hint">Drag to reorder (only when Minimal Mode is OFF)</span>
-  </div>
+<div style="margin-top:8px;">
+  <button id="saveScoreBtn">&#128190; Save Score</button>
+  <button id="pauseTimerBtn">&#9208; Pause Timer</button>
+  <span class="drag-hint">Drag to reorder (only when Minimal Mode is OFF)</span>
 </div>
 
 <div id="counters"></div>
 <div id="minimalModeContainer"></div>
 
 <div id="historyContainer">
-  <h3>Saved Scores</h3>
-  <table id="historyTable">
-    <thead><th></th></tr></thead>
-    <tbody></tbody>
-  </table>
+  <h3>Saved Scores <span style="font-size:12px;color:gray;font-weight:normal;">&#8212; click a row to select, then &#8984;C / Ctrl+C to copy as tab-separated values</span></h3>
+  <div id="historyTableWrapper">
+    <table id="historyTable">
+      <thead><tr></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
 </div>
 
-<footer style="margin-top:40px; padding-top:20px; border-top:1px solid var(--border); color:gray; font-size:13px; text-align:center;">
+<footer style="margin-top:40px;padding-top:20px;border-top:1px solid var(--border);color:gray;font-size:13px;text-align:center;">
   <p>Widget created to make scoring roots, or anything, possible with the use of a QWERTY Keyboard.</p>
 </footer>
 
 <script>
-/* =======================
+/* ============================
    Config & State
-======================= */
+============================ */
 const KEY_PRESETS = {
-  "Four Rows of Four": ["`","1","2","3","Q","W","E","R","A","S","D","F","Z","X","C","V"],
-  "Q through M": ["Q","W","E","R","T","Y","U","I","O","P","A","S","D","F","G","H","J","K","L","Z","X","C","V","B","N","M"],
-  "Function Keys (F1-3)": ["F1","F2","F3","F4","F5","F6","F7","F8","F9","F10","F11","F12","`","1","2","3","4"]
+  "Four Rows of Four":     ["`","1","2","3","Q","W","E","R","A","S","D","F","Z","X","C","V"],
+  "Q through M":           ["Q","W","E","R","T","Y","U","I","O","P","A","S","D","F","G","H","J","K","L","Z","X","C","V","B","N","M"],
+  "Function Keys (F1-3)":  ["F1","F2","F3","F4","F5","F6","F7","F8","F9","F10","F11","F12","`","1","2","3","4"]
 };
 let KEY_ORDER = KEY_PRESETS["Four Rows of Four"];
-// Allow up to 30 counters (previously limited to the current key preset length)
 const MAX_COUNTERS = 30;
 const DEFAULT_COUNTERS = [
-  { name: "No_Fungus", color: "#562929" }, // Brick Red
-  { name: "AM_Hyphae", color: "#0d0d87" },
-  { name: "DSE", color: "#6d4218" },
-  { name: "LSE", color: "#6d4218" },
-  { name: "Arbuscule", color: "#0d0d87" }, // default neutral
-  { name: "Vesicle", color: "#0d0d87" },
-  { name: "Coil", color: "#0d0d87" },
-  { name: "DSE_and_AM", color: "#9e679e" },
-  { name: "Ves_and_Arb", color: "#0d0d87" },
-  { name: "Olpidium", color: "#432c54" },
-  { name: "Microsclerotia", color: "#6d4218" },
-  { name: "Extra_Structures", color: "#f4f4f6" },
-  { name: "Mold", color: "#432c54" },
-  { name: "Plasmodiophorids", color: "#432c54" },
-  { name: "Root_Rot", color: "#432c54" },
-  { name: "Fine_endo", color: "#0d0d87" }
+  {name:"No_Fungus",color:"#562929"},{name:"AM_Hyphae",color:"#0d0d87"},
+  {name:"DSE",color:"#6d4218"},{name:"LSE",color:"#6d4218"},
+  {name:"Arbuscule",color:"#0d0d87"},{name:"Vesicle",color:"#0d0d87"},
+  {name:"Coil",color:"#0d0d87"},{name:"DSE_and_AM",color:"#9e679e"},
+  {name:"Ves_and_Arb",color:"#0d0d87"},{name:"Olpidium",color:"#432c54"},
+  {name:"Microsclerotia",color:"#6d4218"},{name:"Extra_Structures",color:"#f4f4f6"},
+  {name:"Mold",color:"#432c54"},{name:"Plasmodiophorids",color:"#432c54"},
+  {name:"Root_Rot",color:"#432c54"},{name:"Fine_endo",color:"#0d0d87"}
 ];
-const STORAGE_KEY = "radical_AMF_counter_v2";
-const TEMPLATE_KEY = "radical_TEMPLATE_KEY_v2";
-const HISTORY_KEY = "radical_AMF_history_v2";
-const CUSTOM_KEY_PRESETS_KEY = "radical_AMF_custom_key_presets_v1";
+const STORAGE_KEY           = "radical_AMF_counter_v2";
+const TEMPLATE_KEY          = "radical_TEMPLATE_KEY_v2";
+const HISTORY_KEY           = "radical_AMF_history_v2";
+const CUSTOM_KEY_PRESETS_KEY= "radical_AMF_custom_key_presets_v1";
 
 let state = {
-  counters: [],
-  minimalMode: false,
-  dark: false,
-  sessionStartTime: null,
-  sessionEndTime: null,
-  paused: false,
-  keyPreset: "Four Rows of Four",
-  milestoneReached: false,
-  majorMilestoneReached: false
+  counters:[],minimalMode:false,dark:false,
+  sessionStartTime:null,sessionEndTime:null,paused:false,
+  keyPreset:"Four Rows of Four",milestoneReached:false,majorMilestoneReached:false
 };
+let currentTemplateName  = "__default__";
+let selectedHistoryRow   = null; // index of row selected for Cmd+C copy
 
-let currentTemplateName = "__default__";
-
-/* =======================
-   Load/Save State
-======================= */
+/* ============================
+   Load / Save State
+============================ */
 function loadState(){
-  const raw = localStorage.getItem(STORAGE_KEY);
+  const raw=localStorage.getItem(STORAGE_KEY);
   if(raw){
     try{
-      const parsed = JSON.parse(raw);
-      if(parsed && Array.isArray(parsed.counters)){
-        state = Object.assign(state, parsed);
-        // Load KEY_ORDER from preset (built-in or custom)
+      const parsed=JSON.parse(raw);
+      if(parsed&&Array.isArray(parsed.counters)){
+        state=Object.assign(state,parsed);
         if(state.keyPreset.startsWith("custom:")){
-          const customName = state.keyPreset.substring(7);
-          const customPreset = getCustomKeyPresetByName(customName);
-          if(customPreset){
-            KEY_ORDER = customPreset.keys;
-          } else {
-            KEY_ORDER = KEY_PRESETS["Four Rows of Four"];
-            state.keyPreset = "Four Rows of Four";
-          }
+          const cp=getCustomKeyPresetByName(state.keyPreset.substring(7));
+          KEY_ORDER=cp?cp.keys:KEY_PRESETS["Four Rows of Four"];
+          if(!cp) state.keyPreset="Four Rows of Four";
         } else {
-          KEY_ORDER = KEY_PRESETS[state.keyPreset] || KEY_PRESETS["Four Rows of Four"];
+          KEY_ORDER=KEY_PRESETS[state.keyPreset]||KEY_PRESETS["Four Rows of Four"];
         }
-        document.getElementById("keyPresetSelect").value = state.keyPreset;
-        document.getElementById("keyDisplayMeta").textContent = "Keys: " + KEY_ORDER.join(" ");
+        document.getElementById("keyPresetSelect").value=state.keyPreset;
+        document.getElementById("keyDisplayMeta").textContent="Keys: "+KEY_ORDER.join(" ");
         return;
       }
-    }catch(e){ }
+    }catch(e){}
   }
-  state.counters = DEFAULT_COUNTERS.map(c => ({ name: c.name, value: 0, color: c.color || "" }));
-  KEY_ORDER = KEY_PRESETS[state.keyPreset];
+  state.counters=DEFAULT_COUNTERS.map(c=>({name:c.name,value:0,color:c.color||""}));
+  KEY_ORDER=KEY_PRESETS[state.keyPreset];
   saveState();
 }
-function saveState(){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
+function saveState(){ localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); }
 
-/* =======================
+/* ============================
    Templates
-======================= */
-function loadTemplates(){ 
-  const raw=localStorage.getItem(TEMPLATE_KEY); 
-  return raw?JSON.parse(raw):[]; 
-  return JSON.parse(localStorage.getItem("TEMPLATE_KEY") || "[]");
+============================ */
+function loadTemplates(){
+  const raw=localStorage.getItem(TEMPLATE_KEY);
+  return raw?JSON.parse(raw):[];
 }
 function saveTemplate(name){
   if(!name) return;
   const templates=loadTemplates();
-  const entry = { name: name, counters: state.counters.map(c=>({ name: c.name, color: c.color || "" })) };
-  const idx = templates.findIndex(t=>t.name===name);
-  if(idx!==-1){
-    templates[idx]=entry; // overwrite existing
-  } else {
-    templates.push(entry);
-  }
-  localStorage.setItem("TEMPLATE_KEY", JSON.stringify(templates));
+  const entry={name,counters:state.counters.map(c=>({name:c.name,color:c.color||""}))};
+  const idx=templates.findIndex(t=>t.name===name);
+  if(idx!==-1) templates[idx]=entry; else templates.push(entry);
+  localStorage.setItem(TEMPLATE_KEY,JSON.stringify(templates));
   renderTemplates();
   alert(`Template "${name}" saved.`);
 }
 function applyTemplate(name){
-  const templates=loadTemplates();
-  const t=templates.find(x=>x.name===name);
+  const t=loadTemplates().find(x=>x.name===name);
   if(!t) return;
-  // Each entry is {name, color}
-  state.counters = t.counters.map(entry => ({ name: entry.name, value: 0, color: entry.color || "" }));
-  state.sessionStartTime=null;
-  state.sessionEndTime=null;
-  currentTemplateName = name;
+  state.counters=t.counters.map(e=>({name:e.name,value:0,color:e.color||""}));
+  state.sessionStartTime=null; state.sessionEndTime=null;
+  currentTemplateName=name;
   saveState(); render();
 }
 
-// Populate the templates dropdown
+/* Rebuild the template dropdown HTML + re-attach its button listeners */
 function renderTemplates(){
-  const menu = document.getElementById("templateDropdown");
-
-  // Clear everything except the static action buttons
-  menu.innerHTML = `
-    <button id="saveTemplateBtn">Save Template</button>
-    <button id="deleteTemplateBtn">Delete Template</button>
-    <button id="exportTemplateBtn">Export Template</button>
-    <button id="importTemplateBtn">Import Template</button>
-    <hr style="margin:6px 0;border:none;border-top:1px solid var(--border)">
+  const menu=document.getElementById("templateDropdown");
+  menu.innerHTML=`
+    <button id="saveTemplateBtn">&#128190; Save Template</button>
+    <button id="deleteTemplateBtn">&#128465; Delete Template</button>
+    <button id="exportTemplateBtn">&#128228; Export Template</button>
+    <button id="importTemplateBtn">&#128229; Import Template</button>
+    <hr>
   `;
 
-  // Default template option
-  const defaultBtn = document.createElement("button");
-  defaultBtn.textContent = "Default Template";
-  defaultBtn.onclick = () => {
+  const defaultBtn=document.createElement("button");
+  defaultBtn.textContent="\u21A9 Default Template";
+  defaultBtn.onclick=()=>{
     if(!confirm("Load default template? This will reset counters.")) return;
-    state.counters = DEFAULT_COUNTERS.map(c => ({
-      name: c.name, value: 0, color: c.color || ""
-    }));
-    currentTemplateName = "__default__";
-    saveState();
-    render();
+    state.counters=DEFAULT_COUNTERS.map(c=>({name:c.name,value:0,color:c.color||""}));
+    currentTemplateName="__default__";
+    saveState(); render(); menu.style.display="none";
   };
   menu.appendChild(defaultBtn);
 
-  // Saved templates
-  loadTemplates().forEach(t => {
-    const btn = document.createElement("button");
-    btn.textContent = t.name;
-    btn.onclick = () => {
+  loadTemplates().forEach(t=>{
+    const btn=document.createElement("button");
+    btn.textContent=t.name;
+    btn.onclick=()=>{
       if(!confirm(`Load template "${t.name}"? This will reset counters.`)) return;
-      applyTemplate(t.name);
+      applyTemplate(t.name); menu.style.display="none";
     };
     menu.appendChild(btn);
   });
-}
 
-
-
-/* =======================
-   Custom Key Presets
-======================= */
-function loadCustomKeyPresets(){
-  const raw = localStorage.getItem(CUSTOM_KEY_PRESETS_KEY);
-  return raw ? JSON.parse(raw) : [];
-}
-function saveCustomKeyPreset(name, keys){
-  if(!name || !keys || !keys.length) return;
-  const presets = loadCustomKeyPresets();
-  const idx = presets.findIndex(p => p.name === name);
-  if(idx !== -1){
-    presets[idx] = { name, keys };
-  } else {
-    presets.push({ name, keys });
-  }
-  localStorage.setItem(CUSTOM_KEY_PRESETS_KEY, JSON.stringify(presets));
-  updateKeyPresetDropdown();
-}
-function getCustomKeyPresetByName(name){
-  const presets = loadCustomKeyPresets();
-  return presets.find(p => p.name === name);
-}
-function deleteCustomKeyPreset(name){
-  const presets = loadCustomKeyPresets();
-  const filtered = presets.filter(p => p.name !== name);
-  localStorage.setItem(CUSTOM_KEY_PRESETS_KEY, JSON.stringify(filtered));
-  updateKeyPresetDropdown();
-}
-function updateKeyPresetDropdown(){
-  const select = document.getElementById("keyPresetSelect");
-  if(!select) return;
-  // Store current built-in options
-  const builtInOptions = ["Four Rows of Four", "Q through M", "Function Keys (F1-3)", "Choose Your Own"];
-  const currentValue = select.value;
-  select.innerHTML = "";
-  // Add built-in options
-  builtInOptions.forEach(optVal => {
-    const opt = document.createElement("option");
-    opt.value = optVal;
-    opt.textContent = optVal;
-    select.appendChild(opt);
+  /* Action button listeners (buttons live inside the freshly rebuilt innerHTML) */
+  document.getElementById("saveTemplateBtn").addEventListener("click",()=>{
+    const name=prompt("Enter template name:","Template_"+(loadTemplates().length+1));
+    if(!name) return;
+    if(loadTemplates().find(t=>t.name===name)){
+      if(!confirm(`Template "${name}" exists. Overwrite?`)) return;
+    }
+    saveTemplate(name);
+    currentTemplateName=name;
+    menu.style.display="none";
   });
-  // Add custom presets
-  const customPresets = loadCustomKeyPresets();
-  if(customPresets.length > 0){
-    const divider = document.createElement("option");
-    divider.disabled = true;
-    divider.textContent = "─ Custom Presets ─";
-    select.appendChild(divider);
-    customPresets.forEach(preset => {
-      const opt = document.createElement("option");
-      opt.value = `custom:${preset.name}`;
-      opt.textContent = `${preset.name} (${preset.keys.length} keys)`;
-      select.appendChild(opt);
+
+  document.getElementById("deleteTemplateBtn").addEventListener("click",()=>{
+    if(!currentTemplateName||currentTemplateName==="__default__"){ alert("The default template cannot be deleted."); return; }
+    if(!confirm(`Delete template "${currentTemplateName}"? This cannot be undone.`)) return;
+    const filtered=loadTemplates().filter(t=>t.name!==currentTemplateName);
+    localStorage.setItem(TEMPLATE_KEY,JSON.stringify(filtered));
+    currentTemplateName="__default__";
+    renderTemplates(); menu.style.display="none";
+  });
+
+  document.getElementById("exportTemplateBtn").addEventListener("click",()=>{
+    const template=loadTemplates().find(t=>t.name===currentTemplateName);
+    if(!template){ alert("No saved template selected to export.\nSave a template first, then it will be the active template."); return; }
+    const blob=new Blob([JSON.stringify(template,null,2)],{type:"application/json"});
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download=`${currentTemplateName.replace(/\s+/g,"_")}.json`;
+    a.click(); URL.revokeObjectURL(a.href);
+    menu.style.display="none";
+  });
+
+  document.getElementById("importTemplateBtn").addEventListener("click",()=>{ importTemplate(); menu.style.display="none"; });
+}
+
+/* ============================
+   Custom Key Presets
+============================ */
+function loadCustomKeyPresets(){
+  const raw=localStorage.getItem(CUSTOM_KEY_PRESETS_KEY);
+  return raw?JSON.parse(raw):[];
+}
+function getCustomKeyPresetByName(name){ return loadCustomKeyPresets().find(p=>p.name===name); }
+function deleteCustomKeyPreset(name){
+  localStorage.setItem(CUSTOM_KEY_PRESETS_KEY,JSON.stringify(loadCustomKeyPresets().filter(p=>p.name!==name)));
+  updateKeyPresetDropdown();
+}
+
+function updateKeyPresetDropdown(){
+  const select=document.getElementById("keyPresetSelect");
+  const panel =document.getElementById("keyPresetDropdown");
+  if(!select) return;
+
+  const builtIn=["Four Rows of Four","Q through M","Function Keys (F1-3)","Choose Your Own"];
+  const current=state.keyPreset||select.value;
+  const customs=loadCustomKeyPresets();
+
+  /* Update hidden native select */
+  select.innerHTML="";
+  builtIn.forEach(v=>{ const o=document.createElement("option"); o.value=v; o.textContent=v; select.appendChild(o); });
+  if(customs.length){
+    const d=document.createElement("option"); d.disabled=true; d.textContent="─ Custom Presets ─"; select.appendChild(d);
+    customs.forEach(p=>{ const o=document.createElement("option"); o.value=`custom:${p.name}`; o.textContent=`${p.name} (${p.keys.length} keys)`; select.appendChild(o); });
+  }
+  select.value=current;
+
+  /* Rebuild visible button panel */
+  if(panel){
+    panel.innerHTML="";
+    const allOpts=[
+      ...builtIn.map(v=>({value:v,label:v})),
+      ...(customs.length?[{divider:true,label:"Custom Presets"}]:[]),
+      ...customs.map(p=>({value:`custom:${p.name}`,label:`${p.name} (${p.keys.length} keys)`}))
+    ];
+    allOpts.forEach(opt=>{
+      if(opt.divider){ const d=document.createElement("div"); d.className="panel-divider"; d.textContent=opt.label; panel.appendChild(d); return; }
+      const btn=document.createElement("button");
+      btn.textContent=opt.label;
+      if(opt.value===current) btn.style.fontWeight="bold";
+      btn.addEventListener("click",e=>{
+        e.stopPropagation();
+        select.value=opt.value;
+        select.dispatchEvent(new Event("change"));
+        panel.style.display="none";
+      });
+      panel.appendChild(btn);
     });
   }
-  select.value = currentValue;
 }
 
-/* =======================
-   History
-======================= */
+/* ============================
+   History helpers
+============================ */
 function addHistory(score){
   const hist=JSON.parse(localStorage.getItem(HISTORY_KEY)||"[]");
   hist.push(score);
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(hist));
+  localStorage.setItem(HISTORY_KEY,JSON.stringify(hist));
   renderHistory();
 }
 function getHistory(){ return JSON.parse(localStorage.getItem(HISTORY_KEY)||"[]"); }
-function clearHistory(){ if(confirm("Clear all saved scores?")){ localStorage.removeItem(HISTORY_KEY); renderHistory(); } }
+function clearHistory(){
+  if(confirm("Clear all saved scores?")){
+    localStorage.removeItem(HISTORY_KEY);
+    selectedHistoryRow=null;
+    renderHistory();
+  }
+}
 
-/* =======================
-   Rendering
-======================= */
-const countersDiv = document.getElementById("counters");
-const minimalDiv = document.getElementById("minimalModeContainer");
-const totalCountEl = document.getElementById("totalCount");
-const timeInfoEl = document.getElementById("timeInfo");
-const historyTbody = document.querySelector("#historyTable tbody");
-
+/* ============================
+   Sounds
+============================ */
 function playMilestoneSound(){
-  const ctx = new (window.AudioContext || window.webkitAudioContext)();
-  const now = ctx.currentTime;
-  
-  // moon beam
-  const notes = [
-    { freq: 659.26, duration: 0.64 },  // E5 how
-    { freq: 587.33, duration: 0.32 },  // D5 do
-    { freq: 523.25, duration: 0.32 },  // C5 you
-    { freq: 493.88, duration: 0.40 },  // B4 hold
-    { freq: 440.00, duration: 0.40 },  // A4 a
-    { freq: 660.00, duration: 0.48 },  // E5 moon
-    { freq: 587.33, duration: 0.48 },  // D5 beam
-    { freq: 524.00, duration: 0.24 },  // C5 in
-    { freq: 587.33, duration: 0.24 },  // D5 your
-    { freq: 524.00, duration: 1.00 }  // C5 hand
-];
-  
-  const gain = ctx.createGain();
-  gain.connect(ctx.destination);
-  // Increase initial gain so the melody is louder (user requested higher volume)
-  gain.gain.setValueAtTime(1, now);
-  
-  let time = now;
-  notes.forEach(note => {
-    const osc = ctx.createOscillator();
-    osc.connect(gain);
-    osc.frequency.value = note.freq;
-    osc.type = "sine";
-    osc.start(time);
-    osc.stop(time + note.duration);
-    time += note.duration;
-  });
-  
-}
-
-function playMajorMilestoneSound(){
-  const ctx = new (window.AudioContext || window.webkitAudioContext)();
-  const now = ctx.currentTime;
-  
-  // Create a longer Melody, The Festival
-  const notes = [
-    // First phrase - ascending
-    { freq: 494, duration: 0.4 },  // B4
-    { freq: 523, duration: 0.4 },  // C5
-    { freq: 523, duration: 0.2 },  // C5
-    { freq: 494, duration: 0.2 },  // B4
-    { freq: 523, duration: 0.2 },  // C5
-    { freq: 494, duration: 0.2 },  // B4
-    { freq: 659.26, duration: 0.4 },  // E5
-    { freq: 523, duration: 0.2 },  // C5)
-    { freq: 349, duration: 0.4 },  // F4
-    // Second phrase - descending with variation
-    { freq: 494, duration: 0.4 },  // B4
-    { freq: 523, duration: 0.4 },  // C5
-    { freq: 523, duration: 0.2 },  // C5
-    { freq: 494, duration: 0.2 },  // B4
-    { freq: 523, duration: 0.2 },  // C5
-    { freq: 494, duration: 0.2 },  // B4
-    { freq: 659.26, duration: 0.4 },  // E5
-    { freq: 523, duration: 0.2 },  // C5
-    { freq: 349, duration: 1.4 },  // F4
-    // Third phrase - triumphant
-    { freq: 523, duration: 0.4 },  // C5
-    { freq: 494, duration: 0.2 },  // B4
-    { freq: 659.26, duration: 1.4 }  // E5 (high)
+  const ctx=new(window.AudioContext||window.webkitAudioContext)();
+  const now=ctx.currentTime;
+  const notes=[
+    {freq:659.26,dur:0.64},{freq:587.33,dur:0.32},{freq:523.25,dur:0.32},
+    {freq:493.88,dur:0.40},{freq:440.00,dur:0.40},{freq:660.00,dur:0.48},
+    {freq:587.33,dur:0.48},{freq:524.00,dur:0.24},{freq:587.33,dur:0.24},{freq:524.00,dur:1.00}
   ];
-  
-  const gain = ctx.createGain();
-  gain.connect(ctx.destination);
-  gain.gain.setValueAtTime(2, now);
-  
-  let time = now;
-  notes.forEach(note => {
-    const osc = ctx.createOscillator();
-    osc.connect(gain);
-    osc.frequency.value = note.freq;
-    osc.type = "sine";
-    osc.start(time);
-    osc.stop(time + note.duration);
-    time += note.duration;
-  });
-  
+  const g=ctx.createGain(); g.connect(ctx.destination); g.gain.setValueAtTime(1,now);
+  let t=now; notes.forEach(n=>{ const o=ctx.createOscillator(); o.connect(g); o.frequency.value=n.freq; o.type="sine"; o.start(t); o.stop(t+n.dur); t+=n.dur; });
+}
+function playMajorMilestoneSound(){
+  const ctx=new(window.AudioContext||window.webkitAudioContext)();
+  const now=ctx.currentTime;
+  const notes=[
+    {freq:494,dur:0.4},{freq:523,dur:0.4},{freq:523,dur:0.2},{freq:494,dur:0.2},{freq:523,dur:0.2},{freq:494,dur:0.2},
+    {freq:659.26,dur:0.4},{freq:523,dur:0.2},{freq:349,dur:0.4},
+    {freq:494,dur:0.4},{freq:523,dur:0.4},{freq:523,dur:0.2},{freq:494,dur:0.2},{freq:523,dur:0.2},{freq:494,dur:0.2},
+    {freq:659.26,dur:0.4},{freq:523,dur:0.2},{freq:349,dur:1.4},
+    {freq:523,dur:0.4},{freq:494,dur:0.2},{freq:659.26,dur:1.4}
+  ];
+  const g=ctx.createGain(); g.connect(ctx.destination); g.gain.setValueAtTime(2,now);
+  let t=now; notes.forEach(n=>{ const o=ctx.createOscillator(); o.connect(g); o.frequency.value=n.freq; o.type="sine"; o.start(t); o.stop(t+n.dur); t+=n.dur; });
 }
 
+/* ============================
+   Custom Key Mode modal
+============================ */
 function enterCustomKeyMode(){
-  const modal = document.createElement("div");
-  modal.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:flex;justify-content:center;align-items:center;z-index:9999;";
-  
-  const container = document.createElement("div");
-  container.style.cssText = "background:var(--box);color:var(--text);padding:24px;border-radius:12px;max-width:500px;width:90%;box-shadow:0 4px 12px rgba(0,0,0,0.3);";
-  
-  const title = document.createElement("h3");
-  title.textContent = "Choose Custom Key Bindings";
-  title.style.marginTop = "0";
-  container.appendChild(title);
-  
-  const instruction = document.createElement("p");
-  instruction.style.fontSize = "14px";
-  instruction.style.color = "gray";
-  instruction.textContent = `Press each key in order for the ${state.counters.length} counters below. Press Enter when done.`;
-  container.appendChild(instruction);
-  
-  const countersList = document.createElement("div");
-  countersList.style.cssText = "margin-bottom:16px;max-height:200px;overflow-y:auto;";
-  
-  let capturedKeys = [];
-  let currentIndex = 0;
-  
-  function updateDisplay(){
-    countersList.innerHTML = "";
-    state.counters.forEach((counter, idx) => {
-      const row = document.createElement("div");
-      row.style.cssText = "padding:8px;margin:4px 0;border-radius:6px;border:1px solid var(--border);";
-      if(idx < capturedKeys.length){
-        row.style.background = "var(--box)";
-        row.textContent = `${counter.name}: ${capturedKeys[idx]}`;
-      } else if(idx === capturedKeys.length){
-        row.style.background = "#4a7d3a";
-        row.textContent = `${counter.name}: (waiting for key...)`;
-      } else {
-        row.style.opacity = "0.5";
-        row.textContent = `${counter.name}: (pending)`;
-      }
-      countersList.appendChild(row);
+  const modal=document.createElement("div");
+  modal.style.cssText="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:flex;justify-content:center;align-items:center;z-index:9999;";
+
+  const box=document.createElement("div");
+  box.style.cssText="background:var(--box);color:var(--text);padding:24px;border-radius:12px;max-width:500px;width:90%;box-shadow:0 4px 12px rgba(0,0,0,0.3);";
+
+  const title=document.createElement("h3"); title.textContent="Choose Custom Key Bindings"; title.style.marginTop="0"; box.appendChild(title);
+  const instr=document.createElement("p"); instr.style.cssText="font-size:14px;color:gray;"; instr.textContent=`Press each key in order for the ${state.counters.length} counters. Press Enter when done, or Escape to cancel.`; box.appendChild(instr);
+
+  const list=document.createElement("div"); list.style.cssText="margin-bottom:12px;max-height:220px;overflow-y:auto;"; box.appendChild(list);
+
+  const statusMsg=document.createElement("p"); statusMsg.style.cssText="font-size:13px;color:gray;margin:0 0 10px;"; statusMsg.textContent=`Keys captured: 0 / ${state.counters.length}`; box.appendChild(statusMsg);
+
+  /* Name input — shown only after all keys captured */
+  const nameLabel=document.createElement("label"); nameLabel.textContent="Preset name:"; nameLabel.style.cssText="display:none;font-size:13px;"; box.appendChild(nameLabel);
+  const nameInput=document.createElement("input"); nameInput.type="text"; nameInput.placeholder="e.g. My Custom Keys"; nameInput.style.cssText="display:none;width:100%;padding:8px;margin:4px 0 12px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);box-sizing:border-box;"; box.appendChild(nameInput);
+
+  const btnRow=document.createElement("div"); btnRow.style.cssText="display:flex;gap:8px;justify-content:flex-end;"; box.appendChild(btnRow);
+
+  const cancelBtn=document.createElement("button"); cancelBtn.textContent="Cancel"; cancelBtn.onclick=()=>{ window.removeEventListener("keydown",keyHandler); modal.remove(); }; btnRow.appendChild(cancelBtn);
+  const undoBtn=document.createElement("button"); undoBtn.textContent="\u232B Undo Last";
+  undoBtn.onclick=()=>{
+    if(capturedKeys.length===0) return;
+    capturedKeys.pop();
+    if(capturedKeys.length<state.counters.length){ nameLabel.style.display="none"; nameInput.style.display="none"; saveBtn.disabled=true; window.addEventListener("keydown",keyHandler); }
+    updateList(); statusMsg.textContent=`Keys captured: ${capturedKeys.length} / ${state.counters.length}`;
+  };
+  btnRow.appendChild(undoBtn);
+  const saveBtn=document.createElement("button"); saveBtn.textContent="Save Preset"; saveBtn.style.cssText="background:#4a7d3a;color:#fff;"; saveBtn.disabled=true;
+  saveBtn.onclick=()=>{
+    const pname=nameInput.value.trim();
+    if(!pname){ alert("Please enter a preset name."); nameInput.focus(); return; }
+    const presets=loadCustomKeyPresets();
+    const idx=presets.findIndex(p=>p.name===pname);
+    if(idx!==-1) presets[idx]={name:pname,keys:capturedKeys}; else presets.push({name:pname,keys:capturedKeys});
+    localStorage.setItem(CUSTOM_KEY_PRESETS_KEY,JSON.stringify(presets));
+    state.keyPreset=`custom:${pname}`; KEY_ORDER=capturedKeys;
+    document.getElementById("keyDisplayMeta").textContent="Keys: "+KEY_ORDER.join(" ");
+    saveState(); modal.remove(); updateKeyPresetDropdown(); document.getElementById("keyPresetSelect").value=state.keyPreset; render();
+  };
+  btnRow.appendChild(saveBtn);
+
+  modal.appendChild(box);
+  document.body.appendChild(modal);
+
+  let capturedKeys=[];
+
+  function updateList(){
+    list.innerHTML="";
+    state.counters.forEach((c,i)=>{
+      const row=document.createElement("div");
+      row.style.cssText="padding:7px 10px;margin:3px 0;border-radius:6px;border:1px solid var(--border);font-size:13px;";
+      if(i<capturedKeys.length){ row.textContent=`${c.name}: ${capturedKeys[i]}`; }
+      else if(i===capturedKeys.length){ row.style.background="#4a7d3a"; row.style.color="#fff"; row.textContent=`${c.name}: (press a key now\u2026)`; }
+      else { row.style.opacity="0.45"; row.textContent=`${c.name}: (pending)`; }
+      list.appendChild(row);
     });
   }
-  
-  updateDisplay();
-  container.appendChild(countersList);
-  
-  const presetNameInput = document.createElement("input");
-  presetNameInput.type = "text";
-  presetNameInput.placeholder = "Preset name (e.g., 'My Custom Keys')";
-  presetNameInput.style.cssText = "width:100%;padding:8px;margin-bottom:12px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);box-sizing:border-box;";
-  presetNameInput.disabled = true;
-  container.appendChild(presetNameInput);
-  
-  const buttonRow = document.createElement("div");
-  buttonRow.style.cssText = "display:flex;gap:8px;justify-content:flex-end;";
-  
-  const cancelBtn = document.createElement("button");
-  cancelBtn.textContent = "Cancel";
-  cancelBtn.style.cssText = "padding:8px 16px;border-radius:6px;border:1px solid var(--border);background:var(--box);color:var(--text);cursor:pointer;";
-  cancelBtn.onclick = () => modal.remove();
-  buttonRow.appendChild(cancelBtn);
-  
-  const saveBtn = document.createElement("button");
-  saveBtn.textContent = "Save Preset";
-  saveBtn.style.cssText = "padding:8px 16px;border-radius:6px;border:1px solid var(--border);background:#4a7d3a;color:#fff;cursor:pointer;";
-  saveBtn.disabled = true;
-  saveBtn.onclick = () => {
-    const presetName = presetNameInput.value.trim();
-    if(!presetName){
-      alert("Please enter a preset name.");
-      return;
-    }
-    if(capturedKeys.length !== state.counters.length){
-      alert(`You need to capture ${state.counters.length} keys.`);
-      return;
-    }
-    // Store the preset in localStorage directly without calling updateKeyPresetDropdown yet
-    const presets = loadCustomKeyPresets();
-    const idx = presets.findIndex(p => p.name === presetName);
-    if(idx !== -1){
-      presets[idx] = { name: presetName, keys: capturedKeys };
-    } else {
-      presets.push({ name: presetName, keys: capturedKeys });
-    }
-    localStorage.setItem(CUSTOM_KEY_PRESETS_KEY, JSON.stringify(presets));
-    
-    // Update state
-    state.keyPreset = `custom:${presetName}`;
-    KEY_ORDER = capturedKeys;
-    document.getElementById("keyDisplayMeta").textContent = "Keys: " + KEY_ORDER.join(" ");
-    saveState();
-    
-    // Remove modal first
-    modal.remove();
-    
-    // Then update dropdown and render
-    updateKeyPresetDropdown();
-    document.getElementById("keyPresetSelect").value = state.keyPreset;
-    render();
-  };
-  buttonRow.appendChild(saveBtn);
-  container.appendChild(buttonRow);
-  
-  modal.appendChild(container);
-  document.body.appendChild(modal);
-  
-  // Key capture handler
+  updateList();
+
   function keyHandler(e){
-    // Ignore certain keys
-    if(['Enter','Escape','Control','Alt','Shift','Meta','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Tab'].includes(e.key)){
-      if(e.key === 'Enter' && capturedKeys.length === state.counters.length){
-        e.preventDefault();
-        presetNameInput.disabled = false;
-        saveBtn.disabled = false;
-        presetNameInput.focus();
-        window.removeEventListener("keydown", keyHandler);
-      } else if(e.key === 'Escape'){
-        e.preventDefault();
-        window.removeEventListener("keydown", keyHandler);
-        modal.remove();
+    const skip=["Enter","Escape","Control","Alt","Shift","Meta","ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Tab"];
+    if(skip.includes(e.key)){
+      if(e.key==="Escape"){ e.preventDefault(); window.removeEventListener("keydown",keyHandler); modal.remove(); }
+      else if(e.key==="Enter"&&capturedKeys.length===state.counters.length){
+        e.preventDefault(); window.removeEventListener("keydown",keyHandler);
+        nameLabel.style.display="block"; nameInput.style.display="block"; saveBtn.disabled=false; nameInput.focus();
       }
       return;
     }
+    if(document.activeElement===nameInput) return;
     e.preventDefault();
-    if(capturedKeys.length < state.counters.length){
-      const key = e.key.toUpperCase();
-      if(!capturedKeys.includes(key)){
-        capturedKeys.push(key);
-        updateDisplay();
-      } else {
-        alert(`Key "${key}" already used. Pick a different key.`);
-      }
+    if(capturedKeys.length>=state.counters.length) return;
+    const key=e.key.toUpperCase();
+    if(capturedKeys.includes(key)){ alert(`"${key}" already used — pick a different key.`); return; }
+    capturedKeys.push(key); updateList();
+    statusMsg.textContent=`Keys captured: ${capturedKeys.length} / ${state.counters.length}`;
+    if(capturedKeys.length===state.counters.length){
+      statusMsg.textContent=`All ${state.counters.length} keys captured! Enter a name below and click Save.`;
+      window.removeEventListener("keydown",keyHandler);
+      nameLabel.style.display="block"; nameInput.style.display="block"; saveBtn.disabled=false; nameInput.focus();
     }
   }
-  
-  window.addEventListener("keydown", keyHandler);
-  modal.focus();
+  window.addEventListener("keydown",keyHandler);
 }
 
+/* ============================
+   updateTotal / speak / timer
+============================ */
 function updateTotal(){
-  // Counters whose names indicate 'extra' or 'intersection' should subtract from the total
-
-  function isNegativeCounter(name){
-    if(!name) return false;
-    const n = String(name).toLowerCase().replace(/[^a-z0-9]+/g,' ');
-    return /\b(extra|intersection)\b/.test(n);
-  }
-
-  const positive = state.counters.reduce((s,c)=> s + (isNegativeCounter(c.name)?0:(Number(c.value)||0)), 0);
-  const negative = state.counters.reduce((s,c)=> s + (isNegativeCounter(c.name)?(Number(c.value)||0):0), 0);
-  const total = positive - negative;
-  totalCountEl.textContent = `Total: ${total}`;
-
-  if(total === 150 && !state.majorMilestoneReached){
-    state.majorMilestoneReached = true;
-    playMajorMilestoneSound();
-  } else if(total === 100 && !state.milestoneReached){
-    state.milestoneReached = true;
-    playMilestoneSound();
-  } else if(total < 100){
-    state.milestoneReached = false;
-  } else if(total < 150){
-    state.majorMilestoneReached = false;
-  }
+  function isNeg(n){ if(!n) return false; return /\b(extra|intersection)\b/.test(String(n).toLowerCase().replace(/[^a-z0-9]+/g," ")); }
+  const pos=state.counters.reduce((s,c)=>s+(isNeg(c.name)?0:(Number(c.value)||0)),0);
+  const neg=state.counters.reduce((s,c)=>s+(isNeg(c.name)?(Number(c.value)||0):0),0);
+  const total=pos-neg;
+  document.getElementById("totalCount").textContent=`Total: ${total}`;
+  if(total===150&&!state.majorMilestoneReached){ state.majorMilestoneReached=true; playMajorMilestoneSound(); }
+  else if(total===100&&!state.milestoneReached){ state.milestoneReached=true; playMilestoneSound(); }
+  else if(total<100){ state.milestoneReached=false; }
+  else if(total<150){ state.majorMilestoneReached=false; }
 }
+
 function speak(text){
   if(!("speechSynthesis" in window)) return;
-  // Replace underscores with spaces so the synthesizer doesn't read them aloud as "underscore"
-  const processedText = String(text).replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
-  const msg = new SpeechSynthesisUtterance(processedText);
-
-  // Helper: pick a preferred British (en-GB) / UK voice and prefer common female names
-  function selectPreferredVoice(){
-    const voices = speechSynthesis.getVoices() || [];
-    if(!voices.length) return null;
-
-    const femaleNamePattern = /fiona|eilidh|sophie|molly|ava|amelia|victoria|samantha|katherine|kathleen|laura|emily|claire/i;
-    // 1) prefer female-sounding known names
-    let voice = voices.find(v => femaleNamePattern.test(v.name));
-    if(voice) return voice;
-
-    // 2) prefer en-GB / UK voices by language tag or name
-    voice = voices.find(v => /en-?gb|en-?uk/i.test(v.lang) || /uk|great britain|united kingdom|british/i.test(v.name));
-    if(voice) return voice;
-
-    // 3) fallback to any English voice
-    voice = voices.find(v => /^en/i.test(v.lang));
-    if(voice) return voice;
-
-    // 4) final fallback: first available voice
-    return voices[0] || null;
+  const msg=new SpeechSynthesisUtterance(String(text).replace(/_/g," ").replace(/\s+/g," ").trim());
+  function pickVoice(){
+    const vs=speechSynthesis.getVoices()||[];
+    return vs.find(v=>/fiona|eilidh|sophie|molly|ava|amelia|victoria|samantha|katherine|kathleen|laura|emily|claire/i.test(v.name))
+      ||vs.find(v=>/en-?gb|en-?uk/i.test(v.lang)||/uk|great britain|united kingdom|british/i.test(v.name))
+      ||vs.find(v=>/^en/i.test(v.lang))||vs[0]||null;
   }
-
-  // If we already cached a preferred voice, use it
-  if(window._preferredVoice){ msg.voice = window._preferredVoice; }
-  else {
-    const v = selectPreferredVoice();
-    if(v){ window._preferredVoice = v; msg.voice = v; }
-  }
-
-  // If voices aren't loaded yet, wait for them and then speak once available
-  const loadedVoices = speechSynthesis.getVoices();
-  if(!loadedVoices || !loadedVoices.length){
-    const handler = () => {
-      window._preferredVoice = selectPreferredVoice();
-      if(window._preferredVoice) msg.voice = window._preferredVoice;
-      speechSynthesis.speak(msg);
-      speechSynthesis.removeEventListener('voiceschanged', handler);
-    };
-    speechSynthesis.addEventListener('voiceschanged', handler);
-    return;
-  }
-
-  speechSynthesis.cancel();
-  speechSynthesis.speak(msg);
-}
-function formatTime(ms){
-  if(ms<=0) return "00:00:00";
-  const sec = Math.floor(ms/1000);
-  const h = Math.floor(sec/3600);
-  const m = Math.floor((sec%3600)/60);
-  const s = sec%60;
-  return [h,m,s].map(x=>x.toString().padStart(2,"0")).join(":");
-}
-function updateTimer(){
-  if(!state.sessionStartTime){ timeInfoEl.textContent="Waiting to begin…"; return; }
-  const now = state.paused ? state.sessionEndTime : Date.now();
-  const elapsed = now - state.sessionStartTime;
-  timeInfoEl.textContent = `Elapsed: ${formatTime(elapsed)}`;
+  if(window._preferredVoice) msg.voice=window._preferredVoice;
+  else{ const v=pickVoice(); if(v){ window._preferredVoice=v; msg.voice=v; } }
+  const lv=speechSynthesis.getVoices();
+  if(!lv||!lv.length){ speechSynthesis.addEventListener("voiceschanged",function h(){ window._preferredVoice=pickVoice(); if(window._preferredVoice) msg.voice=window._preferredVoice; speechSynthesis.speak(msg); speechSynthesis.removeEventListener("voiceschanged",h); }); return; }
+  speechSynthesis.cancel(); speechSynthesis.speak(msg);
 }
 
-/* Text color for contrast on bg color */
+function formatTime(ms){ if(ms<=0) return "00:00:00"; const s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60; return [h,m,sec].map(x=>String(x).padStart(2,"0")).join(":"); }
+const timeInfoEl=document.getElementById("timeInfo");
+function updateTimer(){ if(!state.sessionStartTime){ timeInfoEl.textContent="Waiting to begin\u2026"; return; } const now=state.paused?state.sessionEndTime:Date.now(); timeInfoEl.textContent=`Elapsed: ${formatTime(now-state.sessionStartTime)}`; }
+
 function textColorForBg(hex){
   if(!hex) return "";
-  const c=parseInt(hex.slice(1),16);
-  const r=(c>>16)&255, g=(c>>8)&255, b=c&255;
-  const brightness = r*0.299 + g*0.587 + b*0.114;
-
-  // If dark mode, invert the usual logic for very light colors
-  if(document.body.classList.contains("dark")){
-    return brightness > 200 ? "#111" : "#eee"; // very bright bg -> dark text
-  } else {
-    return brightness > 186 ? "#111" : "#eee";
-  }
+  const c=parseInt(hex.slice(1),16),r=(c>>16)&255,g=(c>>8)&255,b=c&255,br=r*0.299+g*0.587+b*0.114;
+  return document.body.classList.contains("dark")?(br>200?"#111":"#eee"):(br>186?"#111":"#eee");
 }
 
+/* ============================
+   Render full mode
+============================ */
+const countersDiv=document.getElementById("counters");
+const minimalDiv=document.getElementById("minimalModeContainer");
 
-/* Render full mode */
 function renderFull(){
   countersDiv.innerHTML="";
   state.counters.forEach((c,idx)=>{
     const box=document.createElement("div");
-    box.className="counter-box";
-    box.draggable=true;
-    box.dataset.index=idx;
+    box.className="counter-box"; box.draggable=true; box.dataset.index=idx;
     box.style.backgroundColor=c.color||"var(--box)";
-    box.style.color=textColorForBg(c.color||"#f4f4f6");
-    const textColor = textColorForBg(c.color || "#f4f4f6");
-    box.style.color = textColor;
-
-    // Drag & drop
+    const tc=textColorForBg(c.color||"#f4f4f6"); box.style.color=tc;
     box.addEventListener("dragstart",e=>{ e.dataTransfer.setData("text/plain",String(idx)); box.style.opacity="0.5"; });
-    box.addEventListener("dragend",e=>{ box.style.opacity=""; });
-    box.addEventListener("dragover",e=>{ e.preventDefault(); });
-    box.addEventListener("drop",e=>{
-      e.preventDefault();
-      const from=Number(e.dataTransfer.getData("text/plain"));
-      const to=idx;
-      if(isNaN(from)) return;
-      const item=state.counters.splice(from,1)[0];
-      state.counters.splice(to,0,item);
-      saveState();
-      render();
-    });
-
-    box.innerHTML = `
+    box.addEventListener("dragend",()=>box.style.opacity="");
+    box.addEventListener("dragover",e=>e.preventDefault());
+    box.addEventListener("drop",e=>{ e.preventDefault(); const from=Number(e.dataTransfer.getData("text/plain")); if(isNaN(from)) return; const item=state.counters.splice(from,1)[0]; state.counters.splice(idx,0,item); saveState(); render(); });
+    box.innerHTML=`
   <div class="counter-top">
-    <input class="counter-name" data-idx="${idx}" value="${c.name}" />
-    <input type="color"
-      value="${c.color || '#f4f4f6'}"
-      data-idx="${idx}"
-      class="counter-color-picker"
-      title="Choose counter color" />
+    <input class="counter-name" data-idx="${idx}" value="${c.name}"/>
+    <input type="color" value="${c.color||"#f4f4f6"}" data-idx="${idx}" class="counter-color-picker" title="Choose counter color"/>
   </div>
-
-  <div style="margin-top:8px">
-    <strong>Count:</strong>
-    <span id="val-${idx}">${c.value || 0}</span>
-  </div>
-
-  <div class="key-label">
-    <strong>Key:</strong> ${KEY_ORDER[idx] || "—"}
-  </div>
-
+  <div style="margin-top:8px"><strong>Count:</strong> <span id="val-${idx}">${c.value||0}</span></div>
+  <div class="key-label"><strong>Key:</strong> ${KEY_ORDER[idx]||"—"}</div>
   <div class="btn-row">
     <button class="small" data-action="inc" data-idx="${idx}">+1</button>
     <button class="small" data-action="dec" data-idx="${idx}">-1</button>
     <button class="small" data-action="del" data-idx="${idx}">Delete</button>
-  </div>
-`;
-// Force input text color AFTER elements exist
-box.querySelectorAll("input").forEach(inp => {
-  inp.style.color = textColor;
-});
-
+  </div>`;
+    box.querySelectorAll("input").forEach(i=>i.style.color=tc);
     countersDiv.appendChild(box);
   });
-
-  document.querySelectorAll(".counter-name").forEach(inp=>{
-    inp.addEventListener("change",e=>{
-      const i=Number(inp.dataset.idx);
-      state.counters[i].name=inp.value.trim()||`Counter ${i+1}`;
-      saveState(); render();
-    });
-  });
+  document.querySelectorAll(".counter-name").forEach(inp=>inp.addEventListener("change",()=>{ const i=Number(inp.dataset.idx); state.counters[i].name=inp.value.trim()||`Counter ${i+1}`; saveState(); render(); }));
   document.querySelectorAll(".counter-color-picker").forEach(pick=>{
-    pick.addEventListener("input", e => {
-      const i = Number(pick.dataset.idx);
-      const color = pick.value;
-
-      // Update state
-      state.counters[i].color = color;
-      saveState();
-
-      // Update visuals ONLY (no re-render)
-      const box = pick.closest(".counter-box");
-      box.style.backgroundColor = color;
-
-      const textColor = textColorForBg(color);
-      box.style.color = textColor;
-      box.querySelectorAll("input").forEach(inp => {
-        inp.style.color = textColor;
-      });
-    });
-
+    pick.addEventListener("input",()=>{ const i=Number(pick.dataset.idx),col=pick.value; state.counters[i].color=col; saveState(); const bx=pick.closest(".counter-box"); bx.style.backgroundColor=col; const tc2=textColorForBg(col); bx.style.color=tc2; bx.querySelectorAll("input").forEach(x=>x.style.color=tc2); });
+    pick.addEventListener("mousedown",e=>e.stopPropagation());
+    pick.addEventListener("click",e=>e.stopPropagation());
   });
-  document.querySelectorAll(".counter-color-picker").forEach(pick => {
-    pick.addEventListener("mousedown", e => {
-      e.stopPropagation(); // prevents drag
-    });
-    pick.addEventListener("click", e => {
-    e.stopPropagation(); // keeps picker open
-    });
-  });
-  document.querySelectorAll("button[data-action]").forEach(btn=>{
-    btn.addEventListener("click",e=>{
-      const i=Number(btn.dataset.idx);
-      const act=btn.dataset.action;
-      if(act==="inc") incrementAt(i);
-      else if(act==="dec") decrementAt(i);
-      else if(act==="del"){
-        if(confirm(`Delete counter "${state.counters[i].name}"? Keys will shift.`)){
-          state.counters.splice(i,1); saveState(); render();
-        }
-      }
-    });
-  });
+  document.querySelectorAll("button[data-action]").forEach(btn=>btn.addEventListener("click",()=>{
+    const i=Number(btn.dataset.idx),act=btn.dataset.action;
+    if(act==="inc") incrementAt(i);
+    else if(act==="dec") decrementAt(i);
+    else if(act==="del"){ if(confirm(`Delete counter "${state.counters[i].name}"? Keys will shift.`)){ state.counters.splice(i,1); saveState(); render(); } }
+  }));
 }
 
-/* Render minimal mode */
 function renderMinimal(){
-  minimalDiv.innerHTML="";
-  minimalDiv.style.display="flex"; minimalDiv.style.flexWrap="wrap";
+  minimalDiv.innerHTML=""; minimalDiv.style.display="flex"; minimalDiv.style.flexWrap="wrap";
   state.counters.forEach((c,idx)=>{
-    const tile=document.createElement("div");
-    tile.className="minimal-box"; tile.dataset.idx=idx;
-    tile.style.backgroundColor=c.color||"var(--box)";
-    tile.style.color=textColorForBg(c.color||"#f4f4f6");
+    const tile=document.createElement("div"); tile.className="minimal-box"; tile.dataset.idx=idx;
+    tile.style.backgroundColor=c.color||"var(--box)"; tile.style.color=textColorForBg(c.color||"#f4f4f6");
     tile.innerHTML=`<div class="minimal-label">${c.name}</div><div class="minimal-number">${c.value||0}</div><div class="meta" style="margin-top:8px">Key: ${KEY_ORDER[idx]||"—"}</div>`;
-    tile.onclick=()=>incrementAt(idx);
-    minimalDiv.appendChild(tile);
+    tile.onclick=()=>incrementAt(idx); minimalDiv.appendChild(tile);
   });
 }
 
-/* Render history table */
+/* ============================
+   Render history table
+============================ */
 function renderHistory(){
   const hist=getHistory();
-  historyTbody.innerHTML="";
+  const tbody=document.querySelector("#historyTable tbody");
+  const thead=document.querySelector("#historyTable thead");
+  tbody.innerHTML=""; thead.innerHTML="";
   if(!hist.length) return;
 
-  // Collect all counter names across all scores
   const allNames=[...new Set(hist.flatMap(r=>Object.keys(r.counters)))];
+  thead.innerHTML="<tr>"+["sample_id",...allNames,"Start","End","Duration (min)","Notes","Copy","Delete"].map(h=>`<th>${h}</th>`).join("")+"</tr>";
 
   hist.forEach((r,i)=>{
     const tr=document.createElement("tr");
-    const cells=[
+    tr.dataset.idx=i;
+    if(selectedHistoryRow===i) tr.classList.add("selected-row");
+    tr.innerHTML=[
       `<td>${r.sample_id}</td>`,
       ...allNames.map(n=>`<td>${r.counters[n]||0}</td>`),
       `<td>${r.start_timestamp}</td>`,
       `<td>${r.end_timestamp}</td>`,
       `<td>${r.duration_minutes||0}</td>`,
       `<td>${r.notes||""}</td>`,
-      `<td><button data-idx="${i}" class="small">Delete</button></td>`
-    ];
-    tr.innerHTML=cells.join("");
-    historyTbody.appendChild(tr);
-  });
-
-  // Update table header
-  const thead=document.querySelector("#historyTable thead");
-  thead.innerHTML="";
-  const headerRow=["sample_id", ...allNames, "Start", "End", "Duration (min)", "Notes", "Delete"];
-  thead.innerHTML="<tr>"+headerRow.map(h=>`<th>${h}</th>`).join("")+"</tr>";
-
-  // Delete buttons
-  document.querySelectorAll("#historyTable button").forEach(btn=>{
-    btn.addEventListener("click",e=>{
-      const i=Number(btn.dataset.idx);
-      const hist=getHistory();
-      if(confirm(`Delete score "${hist[i].sample_id}"?`)){
-        hist.splice(i,1);
-        localStorage.setItem(HISTORY_KEY,JSON.stringify(hist));
-        renderHistory();
-      }
+      `<td><button data-copy="${i}" class="small" title="Copy row">&#128203;</button></td>`,
+      `<td><button data-del="${i}" class="small" title="Delete">&#128465;</button></td>`
+    ].join("");
+    tr.addEventListener("click",e=>{
+      if(e.target.closest("button")) return;
+      selectedHistoryRow=(selectedHistoryRow===i)?null:i;
+      renderHistory();
     });
+    tbody.appendChild(tr);
   });
+
+  document.querySelectorAll("button[data-copy]").forEach(btn=>btn.addEventListener("click",e=>{ e.stopPropagation(); copyHistoryRow(Number(btn.dataset.copy)); }));
+  document.querySelectorAll("button[data-del]").forEach(btn=>btn.addEventListener("click",e=>{
+    e.stopPropagation(); const i=Number(btn.dataset.del); const h=getHistory();
+    if(confirm(`Delete score "${h[i].sample_id}"?`)){ if(selectedHistoryRow===i) selectedHistoryRow=null; h.splice(i,1); localStorage.setItem(HISTORY_KEY,JSON.stringify(h)); renderHistory(); }
+  }));
 }
 
-/* Top-level render */
+function copyHistoryRow(idx){
+  const hist=getHistory(); const r=hist[idx]; if(!r) return;
+  const allNames=[...new Set(hist.flatMap(x=>Object.keys(x.counters)))];
+  const vals=[r.sample_id,...allNames.map(n=>r.counters[n]||0),r.start_timestamp,r.end_timestamp,r.duration_minutes||0,r.notes||""];
+  navigator.clipboard.writeText(vals.join("\t")).then(()=>{
+    selectedHistoryRow=idx; renderHistory();
+  }).catch(()=>alert("Clipboard copy failed."));
+}
+
+/* ============================
+   Top-level render
+============================ */
 function render(){
   if(state.minimalMode){ countersDiv.style.display="none"; minimalDiv.style.display="flex"; renderMinimal(); }
   else{ minimalDiv.style.display="none"; countersDiv.style.display="block"; renderFull(); }
@@ -916,9 +656,9 @@ function render(){
   saveState(); renderHistory();
 }
 
-/* =======================
-   Counter Ops
-======================= */
+/* ============================
+   Counter ops
+============================ */
 function incrementAt(i){
   if(!state.counters[i]) return;
   if(!state.sessionStartTime) state.sessionStartTime=Date.now();
@@ -926,228 +666,139 @@ function incrementAt(i){
   state.counters[i].value=(Number(state.counters[i].value)||0)+1;
   saveState(); render(); speak(`${state.counters[i].value} ${state.counters[i].name}`);
 }
-function decrementAt(i){ if(!state.counters[i]) return; state.counters[i].value=Math.max(0,(Number(state.counters[i].value)||0)-1); if(!state.paused) state.sessionEndTime=Date.now(); saveState(); render(); speak(`${state.counters[i].value} ${state.counters[i].name}`); }
-function addCounter(){ if(state.counters.length>=MAX_COUNTERS){ alert(`Maximum ${MAX_COUNTERS} counters reached.`); return; } const idx=state.counters.length; state.counters.push({name:`Counter ${idx+1}`,value:0,color:""}); saveState(); render(); }
+function decrementAt(i){
+  if(!state.counters[i]) return;
+  state.counters[i].value=Math.max(0,(Number(state.counters[i].value)||0)-1);
+  if(!state.paused) state.sessionEndTime=Date.now();
+  saveState(); render(); speak(`${state.counters[i].value} ${state.counters[i].name}`);
+}
+function addCounter(){
+  if(state.counters.length>=MAX_COUNTERS){ alert(`Maximum ${MAX_COUNTERS} counters reached.`); return; }
+  state.counters.push({name:`Counter ${state.counters.length+1}`,value:0,color:""});
+  saveState(); render();
+}
 function resetCounters(){
   if(!confirm("Reset all counters and session timing?")) return;
   state.counters.forEach(c=>c.value=0);
-  state.sessionStartTime=null;
-  state.sessionEndTime=null;
-  state.paused=false;
-  state.milestoneReached=false;
+  state.sessionStartTime=null; state.sessionEndTime=null; state.paused=false; state.milestoneReached=false;
   saveState(); render();
-}/* =======================
+}
+
+/* ============================
    Save Score
-======================= */
+============================ */
 function saveScore(){
   if(!state.sessionStartTime){ alert("No counts yet to save."); return; }
   const hist=getHistory();
-  const defaultId="Score_"+(hist.length+1);
-  const name = prompt("Enter Sample ID:",defaultId);
-  if(!name) return;
-  const notes = prompt("Add notes (optional):", "");
+  const name=prompt("Enter Sample ID:","Score_"+(hist.length+1)); if(!name) return;
+  const notes=prompt("Add notes (optional):","");
   const start=new Date(state.sessionStartTime).toLocaleTimeString();
   const end=new Date(state.sessionEndTime).toLocaleTimeString();
-  const durationSeconds=Math.floor((state.sessionEndTime-state.sessionStartTime)/1000);
-  const durationMinutes=Math.round(durationSeconds/60*100)/100;
-  const countsObj={};
-  state.counters.forEach(c=>countsObj[c.name]=c.value||0);
-  const session={sample_id:name,counters:countsObj,notes:notes||"",start_timestamp:start,end_timestamp:end,duration_minutes:durationMinutes};
-  addHistory(session);
-  state.counters.forEach(c=>c.value=0); // reset
+  const durMin=Math.round(Math.floor((state.sessionEndTime-state.sessionStartTime)/1000)/60*100)/100;
+  const countsObj={}; state.counters.forEach(c=>countsObj[c.name]=c.value||0);
+  addHistory({sample_id:name,counters:countsObj,notes:notes||"",start_timestamp:start,end_timestamp:end,duration_minutes:durMin});
+  state.counters.forEach(c=>c.value=0);
   state.sessionStartTime=null; state.sessionEndTime=null; state.paused=false;
   saveState(); render();
 }
 
-/* =======================
-   Export Button Template
-======================= */
-document.getElementById("exportTemplateBtn").addEventListener("click", () => {
-  const templates = loadTemplates();
-  const template = templates.find(t => t.name === currentTemplateName);
-
-  if (!template) {
-    alert("No template to export.");
-    return;
-  }
-
-  const blob = new Blob(
-    [JSON.stringify(template, null, 2)],
-    { type: "application/json" }
-  );
-
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = `${currentTemplateName.replace(/\s+/g, "_")}.json`;
-  a.click();
-  URL.revokeObjectURL(a.href);
-});
-
-
-/* =======================
-   Import Button Template
-======================= */
-
+/* ============================
+   Import Template
+============================ */
 function importTemplate(){
-  const input = document.createElement("input");
-  input.type = "file";
-  input.accept = ".json,application/json";
-
-  input.onchange = e => {
-    const file = e.target.files[0];
-    if(!file) return;
-
-    const reader = new FileReader();
-    reader.onload = () => {
+  const input=document.createElement("input"); input.type="file"; input.accept=".json,application/json";
+  input.onchange=e=>{
+    const file=e.target.files[0]; if(!file) return;
+    const reader=new FileReader();
+    reader.onload=()=>{
       try{
-        const imported = JSON.parse(reader.result);
-
-        if(!imported.name || !Array.isArray(imported.counters)){
-          alert("Invalid template file.");
-          return;
-        }
-
-        const templates = loadTemplates();
-        const idx = templates.findIndex(t => t.name === imported.name);
-
-        if(idx !== -1){
-          if(!confirm(`Template "${imported.name}" exists. Overwrite?`)) return;
-          templates[idx] = imported;
-        } else {
-          templates.push(imported);
-        }
-
-        localStorage.setItem(TEMPLATE_KEY, JSON.stringify(templates));
-        renderTemplates();
-        alert(`Template "${imported.name}" imported successfully.`);
-      } catch(err){
-        alert("Failed to read template file.");
-      }
+        const imp=JSON.parse(reader.result);
+        if(!imp.name||!Array.isArray(imp.counters)){ alert("Invalid template file."); return; }
+        const ts=loadTemplates(); const idx=ts.findIndex(t=>t.name===imp.name);
+        if(idx!==-1){ if(!confirm(`Template "${imp.name}" exists. Overwrite?`)) return; ts[idx]=imp; } else ts.push(imp);
+        localStorage.setItem(TEMPLATE_KEY,JSON.stringify(ts)); renderTemplates(); alert(`Template "${imp.name}" imported.`);
+      }catch(err){ alert("Failed to read template file."); }
     };
-
     reader.readAsText(file);
   };
-
   input.click();
 }
 
-document.getElementById("importTemplateBtn")
-  .addEventListener("click", importTemplate);
-
-
-/* =======================
+/* ============================
    Export CSV
-======================= */
+============================ */
 function exportCSV(){
   const hist=getHistory();
   if(!hist.length){ alert("No scores to export."); return; }
   const allNames=[...new Set(hist.flatMap(r=>Object.keys(r.counters)))];
-  const headers=["sample_id", ...allNames,"start_timestamp","end_timestamp","duration_minutes"];
-  const rows = hist.map(r=>{
-    const row=[r.sample_id];
-    allNames.forEach(n=>row.push(r.counters[n]||0));
-    row.push(r.start_timestamp,r.end_timestamp,r.duration_minutes||0);
-    return row.join(",");
-  });
-  const csv=[headers.join(","), ...rows].join("\n");
+  const headers=["sample_id",...allNames,"start_timestamp","end_timestamp","duration_minutes"];
+  const rows=hist.map(r=>{ const row=[r.sample_id]; allNames.forEach(n=>row.push(r.counters[n]||0)); row.push(r.start_timestamp,r.end_timestamp,r.duration_minutes||0); return row.join(","); });
+  const csv=[headers.join(","),...rows].join("\n");
   const blob=new Blob([csv],{type:"text/csv"});
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
   const fileName=prompt("Enter filename for export:","radical_AMF_scores.csv")||"radical_AMF_scores.csv";
-  a.download=fileName;
-  a.click();
+  a.download=fileName; a.click();
+  if(confirm("Export complete!\n\nWould you like to clear the saved score history now?")){ clearHistory(); }
 }
 
-/* =======================
-   Append a CSV
-======================= */
-function appendToCSV(){
-  const hist = getHistory();
-  if(!hist.length){
-    alert("No saved scores to append.");
-    return;
+/* ============================
+   Append to CSV
+============================ */
+async function appendToCSV(){
+  const hist=getHistory();
+  if(!hist.length){ alert("No saved scores to append."); return; }
+
+  function buildCombined(existingText){
+    const lines=existingText.trim().split(/\r?\n/);
+    const allNames=[...new Set(hist.flatMap(r=>Object.keys(r.counters)))];
+    const expectedHeader=["sample_id",...allNames,"start_timestamp","end_timestamp","duration_minutes"];
+    const mismatch=expectedHeader.length!==lines[0].split(",").length||!expectedHeader.every((h,i)=>h===lines[0].split(",")[i]);
+    if(mismatch&&!confirm("CSV header does not match.\n\nAppend anyway? (Columns may misalign)")) return null;
+    const newRows=hist.map(r=>{ const row=[r.sample_id]; allNames.forEach(n=>row.push(r.counters[n]||0)); row.push(r.start_timestamp,r.end_timestamp,r.duration_minutes||0); return row.join(","); });
+    return lines.join("\n")+"\n"+newRows.join("\n");
   }
 
-  const input = document.createElement("input");
-  input.type = "file";
-  input.accept = ".csv,text/csv";
-
-  input.onchange = e => {
-    const file = e.target.files[0];
-    if(!file) return;
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      const text = reader.result.trim();
-      if(!text){
-        alert("CSV file is empty.");
-        return;
-      }
-
-      const lines = text.split(/\r?\n/);
-      const existingHeader = lines[0].split(",");
-
-      // Build expected header from history
-      const allNames = [...new Set(hist.flatMap(r => Object.keys(r.counters)))];
-      const expectedHeader = [
-        "sample_id",
-        ...allNames,
-        "start_timestamp",
-        "end_timestamp",
-        "duration_minutes"
-      ];
-
-      // Check compatibility
-      const mismatch =
-        expectedHeader.length !== existingHeader.length ||
-        !expectedHeader.every((h,i) => h === existingHeader[i]);
-
-      if(mismatch){
-        if(!confirm(
-          "CSV header does not match this app’s format.\n\n" +
-          "Append anyway? (Columns may misalign)"
-        )){
-          return;
-        }
-      }
-
-      // Build rows to append
-      const newRows = hist.map(r => {
-        const row = [r.sample_id];
-        allNames.forEach(n => row.push(r.counters[n] || 0));
-        row.push(
-          r.start_timestamp,
-          r.end_timestamp,
-          r.duration_minutes || 0
-        );
-        return row.join(",");
-      });
-
-      const combinedCSV =
-        lines.join("\n") + "\n" + newRows.join("\n");
-
-      const blob = new Blob([combinedCSV], { type:"text/csv" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = file.name;
-      a.click();
+  if(window.showOpenFilePicker){
+    let fh;
+    try{ [fh]=await window.showOpenFilePicker({types:[{description:"CSV Files",accept:{"text/csv":[".csv"]}}],multiple:false}); }catch(e){ return; }
+    const file=await fh.getFile();
+    if(!file.size){ alert("CSV file is empty."); return; }
+    const combined=buildCombined(await file.text());
+    if(combined===null) return;
+    try{
+      const w=await fh.createWritable(); await w.write(combined); await w.close();
+      if(confirm(`Done! Appended ${hist.length} row(s) to "${file.name}".\n\nWould you like to clear the saved score history now?`)){ clearHistory(); }
+    }catch(err){ alert("Could not write to file:\n"+err.message); }
+  } else {
+    const input=document.createElement("input"); input.type="file"; input.accept=".csv,text/csv";
+    input.onchange=e=>{
+      const file=e.target.files[0]; if(!file) return;
+      const reader=new FileReader();
+      reader.onload=()=>{
+        const combined=buildCombined(reader.result); if(combined===null) return;
+        const blob=new Blob([combined],{type:"text/csv"});
+        const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=file.name; a.click();
+        if(confirm("File downloaded.\n\nWould you like to clear the saved score history now?")){ clearHistory(); }
+      };
+      reader.readAsText(file);
     };
-
-    reader.readAsText(file);
-  };
-
-  input.click();
+    input.click();
+  }
 }
-document.getElementById("appendCsvBtn")
-  .addEventListener("click", appendToCSV);
 
-
-/* =======================
-   Keyboard Mapping
-======================= */
+/* ============================
+   Keyboard handler
+   Cmd/Ctrl+C → copy selected history row (C key still works as counter when no modifier)
+============================ */
 document.addEventListener("keydown",e=>{
+  /* Cmd+C or Ctrl+C */
+  if((e.metaKey||e.ctrlKey)&&e.key.toUpperCase()==="C"){
+    if(selectedHistoryRow!==null){ e.preventDefault(); copyHistoryRow(selectedHistoryRow); }
+    return; /* let browser handle normal copy otherwise */
+  }
   const ae=document.activeElement;
   if(ae&&(ae.tagName==="INPUT"||ae.tagName==="TEXTAREA"||ae.isContentEditable)) return;
+  if(e.metaKey||e.ctrlKey||e.altKey) return; /* skip all other modifier combos */
   const key=String(e.key||"").toUpperCase();
   if(!key) return;
   const pos=KEY_ORDER.indexOf(key);
@@ -1155,157 +806,75 @@ document.addEventListener("keydown",e=>{
   if(pos<state.counters.length){ incrementAt(pos); e.preventDefault(); }
 });
 
-/* =======================
-   Button Events
-======================= */
+/* ============================
+   Dropdown setup helper
+============================ */
+const ALL_PANELS=["keyPresetDropdown","templateDropdown","looksDropdown","toolsDropdown"];
+
+function setupDropdown(btnId,panelId){
+  const btn=document.getElementById(btnId);
+  const panel=document.getElementById(panelId);
+  btn.addEventListener("click",e=>{
+    e.stopPropagation();
+    const open=panel.style.display==="block";
+    ALL_PANELS.forEach(id=>document.getElementById(id).style.display="none");
+    if(!open) panel.style.display="block";
+  });
+  document.addEventListener("click",e=>{ if(!btn.contains(e.target)&&!panel.contains(e.target)) panel.style.display="none"; });
+  panel.addEventListener("click",e=>{ if(e.target.tagName==="BUTTON") setTimeout(()=>panel.style.display="none",80); });
+}
+
+setupDropdown("keyPresetMenuBtn","keyPresetDropdown");
+setupDropdown("templateMenuBtn","templateDropdown");
+setupDropdown("looksMenuBtn","looksDropdown");
+setupDropdown("toolsMenuBtn","toolsDropdown");
+
+/* ============================
+   Button event listeners
+============================ */
 document.getElementById("toggleModeBtn").addEventListener("click",()=>{ state.minimalMode=!state.minimalMode; render(); });
-document.getElementById("resetCountersBtn").addEventListener("click",()=>resetCounters());
-document.getElementById("saveScoreBtn").addEventListener("click",()=>saveScore());
-document.getElementById("exportCsvBtn").addEventListener("click",()=>exportCSV());
-document.getElementById("clearHistoryBtn").addEventListener("click",()=>clearHistory());
 document.getElementById("toggleDarkBtn").addEventListener("click",()=>{ state.dark=!state.dark; render(); });
+document.getElementById("playMoonBeamBtn").addEventListener("click",playMilestoneSound);
+document.getElementById("playFestivalBtn").addEventListener("click",playMajorMilestoneSound);
+document.getElementById("resetCountersBtn").addEventListener("click",resetCounters);
+document.getElementById("saveScoreBtn").addEventListener("click",saveScore);
+document.getElementById("exportCsvBtn").addEventListener("click",exportCSV);
+document.getElementById("appendCsvBtn").addEventListener("click",appendToCSV);
+document.getElementById("clearHistoryBtn").addEventListener("click",clearHistory);
+document.getElementById("addCounterBtn").addEventListener("click",addCounter);
 document.getElementById("pauseTimerBtn").addEventListener("click",()=>{
   state.paused=!state.paused;
   if(state.paused) state.sessionEndTime=Date.now();
-  document.getElementById("pauseTimerBtn").textContent=state.paused?"Resume Timer":"Pause Timer";
+  document.getElementById("pauseTimerBtn").textContent=state.paused?"▶ Resume Timer":"⏸ Pause Timer";
 });
-document.getElementById("saveTemplateBtn").addEventListener("click",()=>{
-  const defaultName = "Template_"+(loadTemplates().length+1);
-  const name=prompt("Enter template name:", defaultName);
-  if(!name) return;
-  const existing = loadTemplates().find(t=>t.name===name);
-  if(existing){
-    if(!confirm(`Template "${name}" exists. Overwrite?`)) return;
-  }
-  saveTemplate(name);
-  currentTemplateName = name;
-  renderTemplates();
-
-});
-
-document.getElementById("deleteTemplateBtn").addEventListener("click", () => {
-  if (!currentTemplateName || currentTemplateName === "__default__") {
-    alert("The default template cannot be deleted.");
-    return;
-  }
-
-  if (!confirm(`Delete template "${currentTemplateName}"? This cannot be undone.`)) {
-    return;
-  }
-
-  let templates = loadTemplates()
-    .filter(t => t.name !== currentTemplateName);
-
-  localStorage.setItem(TEMPLATE_KEY, JSON.stringify(templates));
-
-  currentTemplateName = "__default__";
-  renderTemplates();
-});
-
-
-
-document.getElementById("addCounterBtn").addEventListener("click",()=>addCounter());
 
 document.getElementById("keyPresetSelect").addEventListener("change",e=>{
   const preset=e.target.value;
-  
-  if(preset === "Choose Your Own"){
-    // Enter custom key binding mode
-    enterCustomKeyMode();
-    return;
-  }
-  
+  if(preset==="Choose Your Own"){ enterCustomKeyMode(); return; }
   if(preset.startsWith("custom:")){
-    // Load a saved custom preset
-    const customName = preset.substring(7);
-    const customPreset = getCustomKeyPresetByName(customName);
-    if(customPreset){
-      state.keyPreset = preset;
-      KEY_ORDER = customPreset.keys;
-      document.getElementById("keyDisplayMeta").textContent = "Keys: " + KEY_ORDER.join(" ");
-      saveState();
-      render();
-    }
+    const cp=getCustomKeyPresetByName(preset.substring(7));
+    if(cp){ state.keyPreset=preset; KEY_ORDER=cp.keys; document.getElementById("keyDisplayMeta").textContent="Keys: "+KEY_ORDER.join(" "); saveState(); render(); }
     return;
   }
-  
-  // Load a built-in preset
-  state.keyPreset=preset;
-  KEY_ORDER=KEY_PRESETS[preset];
+  state.keyPreset=preset; KEY_ORDER=KEY_PRESETS[preset];
   document.getElementById("keyDisplayMeta").textContent="Keys: "+KEY_ORDER.join(" ");
-  saveState();
-  render();
+  saveState(); render();
 });
 
-/* =======================
-   Template Menu Toggle
-======================= */
-const templateMenuBtn = document.getElementById("templateMenuBtn");
-const templateDropdown = document.getElementById("templateDropdown");
-
-templateMenuBtn.addEventListener("click", e => {
-  e.stopPropagation();
-  templateDropdown.style.display =
-    templateDropdown.style.display === "block" ? "none" : "block";
-});
-
-document.addEventListener("click", () => {
-  templateDropdown.style.display = "none";
-});
-
-
-// Close dropdown after selecting an option
-templateDropdown.querySelectorAll("button").forEach(btn => {
-  btn.addEventListener("click", () => {
-    templateDropdown.style.display = "none";
-  });
-});
-
-
-/* =======================
-   Settings Menu Toggle
-======================= */
-const settingsMenuBtn = document.getElementById("settingsMenuBtn");
-const settingsDropdown = document.getElementById("settingsDropdown");
-
-settingsMenuBtn.addEventListener("click", e => {
-  e.stopPropagation();
-  const isVisible = settingsDropdown.style.display !== "none";
-  settingsDropdown.style.display = isVisible ? "none" : "block";
-});
-
-// Close dropdown when clicking outside
-document.addEventListener("click", e => {
-  if(!settingsMenuBtn.contains(e.target) && !settingsDropdown.contains(e.target)){
-    settingsDropdown.style.display = "none";
-  }
-});
-
-// Close dropdown after selecting an option
-settingsDropdown.querySelectorAll("button").forEach(btn => {
-  btn.addEventListener("click", () => {
-    settingsDropdown.style.display = "none";
-  });
-});
-
-/* =======================
+/* ============================
    Init
-======================= */
+============================ */
 loadState();
-updateKeyPresetDropdown(); // Populate dropdown with built-in and custom presets
-// Ensure a default template exists (names + colors) so users can restore it after changes
+updateKeyPresetDropdown();
 (function ensureDefaultTemplate(){
-  const templates = loadTemplates();
-  if(!templates || !templates.length){
-    templates.push({
-      name: "Default Template",
-      counters: DEFAULT_COUNTERS.map(c=>({ name: c.name, color: c.color || "" }))
-    });
-    localStorage.setItem(TEMPLATE_KEY, JSON.stringify(templates));
+  const ts=loadTemplates();
+  if(!ts||!ts.length){
+    ts.push({name:"Default Template",counters:DEFAULT_COUNTERS.map(c=>({name:c.name,color:c.color||""}))});
+    localStorage.setItem(TEMPLATE_KEY,JSON.stringify(ts));
   }
 })();
 render();
-setInterval(()=>{if(!state.paused) updateTimer();},1000);
+setInterval(()=>{ if(!state.paused) updateTimer(); },1000);
 </script>
 
 </body>
