@@ -1,2 +1,2 @@
 # AMF-Colonization-Counter
-An HTML Widget created by ChatGPT and VS Code with the help of Sedona Spann.
+An HTML Widget created by iterative, user-driven development supported by AI-assisted prototyping.
