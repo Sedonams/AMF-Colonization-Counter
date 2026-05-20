@@ -70,7 +70,7 @@ tr.selected-row td{ background:rgba(74,125,58,0.15); outline:2px solid #4a7d3a; 
 
 <header>
   <div>
-    <h1>A Radical AMF Colonization Counter</h1>
+    <h1>A Radical Root Colonization Counter</h1>
     <div class="meta" id="keyDisplayMeta">Keys: ` 1 2 3 4 Q W E R A S D F Z X C V</div>
   </div>
 
@@ -169,10 +169,10 @@ const DEFAULT_COUNTERS = [
   {name:"Mold",color:"#432c54"},{name:"Plasmodiophorids",color:"#432c54"},
   {name:"Root_Rot",color:"#432c54"},{name:"Fine_endo",color:"#0d0d87"}
 ];
-const STORAGE_KEY           = "radical_AMF_counter_v2";
+const STORAGE_KEY           = "radical_Root_counter_v2";
 const TEMPLATE_KEY          = "radical_TEMPLATE_KEY_v2";
-const HISTORY_KEY           = "radical_AMF_history_v2";
-const CUSTOM_KEY_PRESETS_KEY= "radical_AMF_custom_key_presets_v1";
+const HISTORY_KEY           = "radical_Root_history_v2";
+const CUSTOM_KEY_PRESETS_KEY= "radical_Root_custom_key_presets_v1";
 
 let state = {
   counters:[],minimalMode:false,dark:false,
@@ -733,7 +733,7 @@ function exportCSV(){
   const csv=[headers.join(","),...rows].join("\n");
   const blob=new Blob([csv],{type:"text/csv"});
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
-  const fileName=prompt("Enter filename for export:","radical_AMF_scores.csv")||"radical_AMF_scores.csv";
+  const fileName=prompt("Enter filename for export:","radical_Root_scores.csv")||"radical_Root_scores.csv";
   a.download=fileName; a.click();
   if(confirm("Export complete!\n\nWould you like to clear the saved score history now?")){ clearHistory(); }
 }
