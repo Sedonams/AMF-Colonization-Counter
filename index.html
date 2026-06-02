@@ -749,8 +749,10 @@ function exportCSV(){
   const csv=[headers.join(","),...rows].join("\n");
   const blob=new Blob([csv],{type:"text/csv"});
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
-  const fileName=prompt("Enter filename for export:","radical_Root_scores.csv")||"radical_Root_scores.csv";
-  a.download=fileName; a.click();
+  const fileName=prompt("Enter filename for export:","radical_Root_scores.csv");
+  if(fileName===null) return;
+  const finalFileName=fileName.trim()||"radical_Root_scores.csv";
+  a.download=finalFileName; a.click();
   if(confirm("Export complete!\n\nWould you like to clear the saved score history now?")){ clearHistory(); }
 }
 
