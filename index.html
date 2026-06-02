@@ -616,7 +616,7 @@ function renderHistory(){
   if(!hist.length) return;
 
   const allNames=[...new Set(hist.flatMap(r=>Object.keys(r.counters)))];
-  thead.innerHTML="<tr>"+["sample_id",...allNames,"Total","Date","Duration (min)","Notes","Copy","Delete"].map(h=>`<th>${h}</th>`).join("")+"</tr>";
+  thead.innerHTML="<tr>"+["sample_id",...allNames,"Total","Duration (min)","Date","Notes","Copy","Delete"].map(h=>`<th>${h}</th>`).join("")+"</tr>";
 
   hist.forEach((r,i)=>{
     const tr=document.createElement("tr");
@@ -626,8 +626,8 @@ function renderHistory(){
       `<td>${r.sample_id}</td>`,
       ...allNames.map(n=>`<td>${r.counters[n]||0}</td>`),
       `<td><strong>${computeRowTotal(r.counters)}</strong></td>`,
-      `<td>${r.date||""}</td>`,
       `<td>${r.duration_minutes||0}</td>`,
+      `<td>${r.date||""}</td>`,
       `<td>${r.notes||""}</td>`,
       `<td><button data-copy="${i}" class="small" title="Copy row">&#128203;</button></td>`,
       `<td><button data-del="${i}" class="small" title="Delete">&#128465;</button></td>`
@@ -742,8 +742,8 @@ function exportCSV(){
   const hist=getHistory();
   if(!hist.length){ alert("No scores to export."); return; }
   const allNames=[...new Set(hist.flatMap(r=>Object.keys(r.counters)))];
-  const headers=["sample_id",...allNames,"total","date","duration_minutes","notes"];
-  const rows=hist.map(r=>{ const row=[toCsvVal(r.sample_id)]; allNames.forEach(n=>row.push(r.counters[n]||0)); row.push(computeRowTotal(r.counters),toCsvVal(r.date||""),r.duration_minutes||0,toCsvVal(r.notes||"")); return row.join(","); });
+  const headers=["sample_id",...allNames,"total","duration_minutes","date","notes"];
+  const rows=hist.map(r=>{ const row=[toCsvVal(r.sample_id)]; allNames.forEach(n=>row.push(r.counters[n]||0)); row.push(computeRowTotal(r.counters),r.duration_minutes||0,toCsvVal(r.date||""),toCsvVal(r.notes||"")); return row.join(","); });
   const csv=[headers.join(","),...rows].join("\n");
   const blob=new Blob([csv],{type:"text/csv"});
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
