@@ -616,7 +616,7 @@ function renderHistory(){
   if(!hist.length) return;
 
   const allNames=[...new Set(hist.flatMap(r=>Object.keys(r.counters)))];
-  thead.innerHTML="<tr>"+["sample_id",...allNames,"Total","Start","End","Duration (min)","Notes","Copy","Delete"].map(h=>`<th>${h}</th>`).join("")+"</tr>";
+  thead.innerHTML="<tr>"+["sample_id",...allNames,"Total","Date","Duration (min)","Notes","Copy","Delete"].map(h=>`<th>${h}</th>`).join("")+"</tr>";
 
   hist.forEach((r,i)=>{
     const tr=document.createElement("tr");
@@ -626,8 +626,7 @@ function renderHistory(){
       `<td>${r.sample_id}</td>`,
       ...allNames.map(n=>`<td>${r.counters[n]||0}</td>`),
       `<td><strong>${computeRowTotal(r.counters)}</strong></td>`,
-      `<td>${r.start_timestamp}</td>`,
-      `<td>${r.end_timestamp}</td>`,
+      `<td>${r.date||""}</td>`,
       `<td>${r.duration_minutes||0}</td>`,
       `<td>${r.notes||""}</td>`,
       `<td><button data-copy="${i}" class="small" title="Copy row">&#128203;</button></td>`,
@@ -651,7 +650,7 @@ function renderHistory(){
 function copyHistoryRow(idx){
   const hist=getHistory(); const r=hist[idx]; if(!r) return;
   const allNames=[...new Set(hist.flatMap(x=>Object.keys(x.counters)))];
-  const vals=[r.sample_id,...allNames.map(n=>r.counters[n]||0),computeRowTotal(r.counters),r.start_timestamp,r.end_timestamp,r.duration_minutes||0,r.notes||""];
+  const vals=[r.sample_id,...allNames.map(n=>r.counters[n]||0),computeRowTotal(r.counters),r.date||"",(r.duration_minutes||0),r.notes||""];
   navigator.clipboard.writeText(vals.join("\t")).then(()=>{
     selectedHistoryRow=idx; renderHistory();
   }).catch(()=>alert("Clipboard copy failed."));
@@ -705,11 +704,10 @@ function saveScore(){
   const hist=getHistory();
   const name=prompt("Enter Sample ID:","Score_"+(hist.length+1)); if(!name) return;
   const notes=prompt("Add notes (optional):","");
-  const start=new Date(state.sessionStartTime).toLocaleTimeString();
-  const end=new Date(state.sessionEndTime).toLocaleTimeString();
+  const date=new Date(state.sessionStartTime).toLocaleDateString();
   const durMin=Math.round(Math.floor((state.sessionEndTime-state.sessionStartTime)/1000)/60*100)/100;
   const countsObj={}; state.counters.forEach(c=>countsObj[c.name]=c.value||0);
-  addHistory({sample_id:name,counters:countsObj,notes:notes||"",start_timestamp:start,end_timestamp:end,duration_minutes:durMin});
+  addHistory({sample_id:name,counters:countsObj,notes:notes||"",date:date,duration_minutes:durMin});
   state.counters.forEach(c=>c.value=0);
   state.sessionStartTime=null; state.sessionEndTime=null; state.paused=false;
   saveState(); render();
@@ -744,8 +742,8 @@ function exportCSV(){
   const hist=getHistory();
   if(!hist.length){ alert("No scores to export."); return; }
   const allNames=[...new Set(hist.flatMap(r=>Object.keys(r.counters)))];
-  const headers=["sample_id",...allNames,"total","start_timestamp","end_timestamp","duration_minutes","notes"];
-  const rows=hist.map(r=>{ const row=[toCsvVal(r.sample_id)]; allNames.forEach(n=>row.push(r.counters[n]||0)); row.push(computeRowTotal(r.counters),toCsvVal(r.start_timestamp),toCsvVal(r.end_timestamp),r.duration_minutes||0,toCsvVal(r.notes||"")); return row.join(","); });
+  const headers=["sample_id",...allNames,"total","date","duration_minutes","notes"];
+  const rows=hist.map(r=>{ const row=[toCsvVal(r.sample_id)]; allNames.forEach(n=>row.push(r.counters[n]||0)); row.push(computeRowTotal(r.counters),toCsvVal(r.date||""),r.duration_minutes||0,toCsvVal(r.notes||"")); return row.join(","); });
   const csv=[headers.join(","),...rows].join("\n");
   const blob=new Blob([csv],{type:"text/csv"});
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
@@ -777,7 +775,7 @@ async function appendToCSV(){
     }
     const existingHeaders=parseCsvLine(lines[0]).map(h=>h.trim());
     const allNames=[...new Set(hist.flatMap(r=>Object.keys(r.counters)))];
-    const newHeaders=["sample_id",...allNames,"total","start_timestamp","end_timestamp","duration_minutes","notes"];
+    const newHeaders=["sample_id",...allNames,"total","date","duration_minutes","notes"];
     const mergedHeaders=[...existingHeaders];
     newHeaders.forEach(h=>{ if(!mergedHeaders.includes(h)) mergedHeaders.push(h); });
     const existingRows=lines.slice(1).filter(l=>l.trim()).map(line=>{
@@ -787,7 +785,7 @@ async function appendToCSV(){
     });
     const newRows=hist.map(r=>{
       const obj={sample_id:r.sample_id,...r.counters,total:computeRowTotal(r.counters),
-        start_timestamp:r.start_timestamp,end_timestamp:r.end_timestamp,
+        date:r.date||"",
         duration_minutes:r.duration_minutes||0,notes:r.notes||""};
       return mergedHeaders.map(h=>toCsvVal(obj[h]!==undefined?obj[h]:"")).join(",");
     });
