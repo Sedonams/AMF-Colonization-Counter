@@ -50,7 +50,7 @@ Innovative tools, such as AMFinder [@Evangelisti:2021], can “score” (all cou
 
 # Software design
 
-The primary design goals were to facilitate highly specialized scoring needs with customizable button options, maintain visual focus on the microscope slide by minimizing user interaction during scoring, create audible confirmation of specific button presses, and provide structured data output.
+The primary design goals were to facilitate highly specialized scoring needs with customizable button options, maintain visual focus on the microscope slide by minimizing user interaction during scoring, create audible confirmation of specific button presses, and provide structured data output. Many of the features included were borne of suggestions from lab mates testing the and retesting the prototype.
 
 The Counter is implemented as a single web page using standard languages (HTML, CSS, and JavaScript). It runs entirely within a web browser and all data is stored locally avoiding any installations, server infrastructures, or internet connectivity. Additionally, all components are platform-native browser APIs making this a zero-dependency web tool.
 
@@ -72,7 +72,7 @@ Counter configurations and score histories are stored locally in the browser so 
 
 # Research impact statement
 
-The `Radical Root Colonization Counter` was developed as a tool to assist  research and is being used by many others in the soil lab. It provides a simple, accessible solution for rapid and standardized root colonization scoring. By integrating keyboard-based input, real-time feedback, and structured data export, the counter reduces cognitive load, minimizes error, and improves efficiency. This application demonstrates the potential of developing lightweight digital tools to enhance data collection in ecological research. The keyboard-driven interface reduces hand movement and minimizes interaction. Audio feedback further reduces the need for visual confirmation, supporting efficient scoring. By eliminating manual transcription and enabling real-time data capture, the application reduces total processing time from observation to analysis-ready dataset. Direct digital recording of counts reduces transcription errors and standardizes data structure across scores.
+The `Radical Root Colonization Counter` was developed as a tool to assist the colonization of one project but has grown to be tested and used and by many others in the soil lab. It provides a simple, accessible solution for rapid and standardized root colonization scoring. By integrating keyboard-based input, real-time feedback, and structured data export, the counter reduces cognitive load, minimizes error, and improves efficiency. This application demonstrates the potential of developing lightweight digital tools to enhance data collection in ecological research. The keyboard-driven interface reduces hand movement and minimizes interaction. Audio feedback further reduces the need for visual confirmation, supporting efficient scoring. By eliminating manual transcription and enabling real-time data capture, the application reduces total processing time from observation to analysis-ready dataset. Direct digital recording of counts reduces transcription errors and standardizes data structure across scores.
 
 # AI usage disclosure
 
@@ -90,7 +90,7 @@ All data are stored locally within the user's browser environment.
 
 # Acknowledgements
 
-Financial support was provided by the US Department of Energy program in Systems Biology Research to Advance Sustainable Bioenergy Crop Development grant DE-SC0021386 (DE-FOA-0002214). Thanks to Dr. Beatice Bock for literary encouragement, Callum Rohrer for constructive and feedback during beta testing, and Dr. Nancy Collins Johnson for advising.
+Financial support was provided by the US Department of Energy program in Systems Biology Research to Advance Sustainable Bioenergy Crop Development grant DE-SC0021386 (DE-FOA-0002214). Thanks to Dr. Beatice Bock for literary encouragement, Callum Rohrer for constructive and feedback during beta testing, Dr. Nancy Collins Johnson for advising, and all the NAU Soil Ecology Lab technicians who continue to provide refinement suggestions.
 
 # References
 
