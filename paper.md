@@ -13,7 +13,7 @@ authors:
 affiliations:
  - name: School of Earth and Sustainability, Northern Arizona University, Flagstaff, Arizona, United States
    index: 1
-date: 24  2026
+date: 25 June 2026
 bibliography: paper.bib
 ---
 
@@ -86,39 +86,9 @@ web application:
 Source code is available at:
 - <https://github.com/Sedonams/AMF-Colonization-Counter>
 The software can also be downloaded and distributed as a standalone HTML file.
-All data are stored locally within the user's browser environment.
 
 # Acknowledgements
 
 Financial support was provided by the US Department of Energy program in Systems Biology Research to Advance Sustainable Bioenergy Crop Development grant DE-SC0021386 (DE-FOA-0002214). Thanks to Dr. Beatice Bock for literary encouragement, Callum Rohrer for constructive and feedback during beta testing, Dr. Nancy Collins Johnson for advising, and all the NAU Soil Ecology Lab technicians who continue to provide refinement suggestions.
 
 # References
-
-Evangelisti et al., 2021, Deep learning-based quantification of arbuscular mycorrhizal fungi in plant roots, New Phytologist, 232(5): 2207-2219.
-
-Vasilis Kokkoris, Antreas Pogiatzis, Miranda M. Hart, Contrasting common measures of arbuscular mycorrhizal fungal root colonization, Journal of Microbiological Methods, Volume 167, 2019, 105727, ISSN 0167-7012, https://doi.org/10.1016/j.mimet.2019.105727.
-
-Brundrett, M. C. (2009). Mycorrhizal associations and other means of nutrition of vascular plants: Understanding the global diversity of host plants by resolving conflicting information and developing reliable means of diagnosis. Plant and Soil, 320(1–2), 37–77.
-
-McGonigle, T. P., Miller, M. H., Evans, D. G., Fairchild, G. L., & Swan, J. A. (1990). A new method which gives an objective measure of colonization of roots by vesicular–arbuscular mycorrhizal fungi. New Phytologist, 115(3), 495–501.
-
-Trouvelot (1986). Mesure du taux de mycorhization VA d’un systeme radiculaire. Recherche de methodes d’estimation ayant une signification fonctionnelle Physiol. Genet. Asp. Mycorrhizae, pp. 217-221
-
-Kardish MR, Mueller UG, Amador-Vargas S, Dietrich EI, Ma R, Barrett B and Fang C-C (2015) Blind trust in unblinded observation in Ecology, Evolution, and Behavior. Front. Ecol. Evol. 3:51. Doi: 10.3389/fevo.2015.00051
-
-Peng, Sida & Kalliamvakou, Eirini & Cihon, Peter & Demirer, Mert (2023). The Impact of AI on Developer Productivity: Evidence from GitHub Copilot. 10.48550/arXiv.2302.06590.
-
-World Wide Web Consortium. (2026). Web Storage API. W3C Recommendation. https://www.w3.org/TR/webstorage/
-
-World Wide Web Consortium (2021). Web Audio API. W3C Candidate Recommendation. https://www.w3.org/TR/webaudio/
-
-World Wide Web Consortium (2026). Web Speech API. Draft Community Group Report. https://webaudio.github.io/web-speech-api/
-
-World Wide Web Consortium (2026). HTML Drag and Drop API. W3C Recommendation. https://www.w3.org/TR/html51/editing.html#dnd
-
-WICG (2025). File System Access API. WICG Specification. https://wicg.github.io/file-system-access/
-
-World Wide Web Consortium (2025). Clipboard API and Events. W3C Working Draft. https://www.w3.org/TR/clipboard-apis/
-
-WHATWG (2026). HTML Living Standard. https://html.spec.whatwg.org/ 
-

@@ -14,3 +14,7 @@ During scoring, the microscopist visualizes root segments and classifies structu
 When the user arrives at their chosen amount of intersections, (this can be tracked by the ‘Total:’ at the top of the page) press ‘save score’ and the sample can be named and notes can be entered. 
 
 Exported datasets are structured in a wide (pivoted) format.
+
+# Use Case
+
+Feedback WELCOME. Feel free to contact me at sedona@nau.edu or on reddit @Ohwaitok.
