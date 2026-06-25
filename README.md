@@ -15,6 +15,6 @@ When the user arrives at their chosen amount of intersections, (this can be trac
 
 Exported datasets are structured in a wide (pivoted) format.
 
-# Use Case
+# How did we do?
 
 Feedback WELCOME. Feel free to contact me at sedona@nau.edu or on reddit @Ohwaitok.
