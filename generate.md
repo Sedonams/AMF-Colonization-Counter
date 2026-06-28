@@ -9,8 +9,8 @@ details = Hash.new({})
 capture_params = [
   { :name => "title", :message => "A Digital Microscopy Counter: Keyboard-Driven Web Application for Rapid Counting and Data Integrity Stewardship" },
   { :name => "url", :message => "Enter the URL of the project repository." },
-  { :name => "description", :message => "Enter the (short) project description." },
-  { :name => "license", :message => "Enter the license this software shared under. (hit enter to skip)\nFor example MIT, BSD, GPL v3.0, Apache 2.0" },
+  { :name => "description", :message => "The `Radical Root Colonization Counter`, a lightweight web application, was designed to streamline grid intersect root scoring." },
+  { :name => "license", :message => "MIT" },
   { :name => "doi", :message => "Enter the DOI of the archived version of this code. (hit enter to skip)\nFor example http://dx.doi.org/10.6084/m9.figshare.828487" },
   { :name => "keywords", :message => "Enter keywords that should be associated with this project (hit enter to skip)\nComma-separated, for example: turkey, chicken, pot pie" },
   { :name => "version", :message => "Enter the version of your software (hit enter to skip)\nSEMVER preferred: http://semver.org e.g. v1.0.0" }
