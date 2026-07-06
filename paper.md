@@ -68,12 +68,12 @@ Each ‘count’ triggers the spoken numeric value that the category has reached
 The application appears in two interface modes housed in the ‘Looks & Sounds’ menu. Users can edit counter names colors and order to match specific scoring schema when toggled out of "Minimal Mode" (reffered to as "Full Mode" in the source code). Toggle to "Minimal Mode" and the app presents large, simplified counters optimal for rapid scoring \autoref{fig:1}.
 
 ![A simple McGonigle method counter template would include these categories, shown here in ‘minimal mode’ and ‘light mode’.\label{fig:1}]
-(figure1.png)
+(H:/AMF-Colonization-Counter/figure1.png)
 
 If the user would like to score using the more accurate yet often more time consuming Trouvelot method wherein colonization intensity is captured using a ranking system of 1-5 for specified fungal structures [@Kokkoris:2019]; the categories could be as follows in \autoref{fig:2}.
 
 ![A Trouvelout method counter template would include these categories, shown here in ‘full  mode’ and ‘dark mode’.\label{fig:2}]
-(figure2.png)
+(H:/AMF-Colonization-Counter/figure2.png)
 
 Each slide is treated as a discrete score. The application automatically records the date and the duration of the score from the first counter press up to when saved. This enables time tracking for each score to help the user control time spent on each slide.
 
@@ -89,10 +89,10 @@ LLM-assisted code generation with Claude, ChatGPT and Gemini was used to acceler
 
 # Availability and Usage
 
-The *Radical Root Colonization Counter* is freely available as a browser-based
-web application: [Radical Root Colonization Counter](sedonams.github.io/AMF-Colonization-Counter).
+The *Radical Root Colonization Counter* is freely available as a browser-based web application: 
+[Radical Root Colonization Counter](sedonams.github.io/AMF-Colonization-Counter).
+The software can also be downloaded and distributed as a standalone HTML file: 
 [Radical Root Colonization Counter Source Code](github.com/Sedonams/AMF-Colonization-Counter).
-The software can also be downloaded and distributed as a standalone HTML file.
 
 # Acknowledgements
 
