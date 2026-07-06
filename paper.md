@@ -175,7 +175,7 @@ The software can also be downloaded and distributed as a standalone HTML file:
 
 Financial support was provided by the US Department of Energy program 
 in Systems Biology Research to Advance Sustainable Bioenergy Crop Development 
-grant DE-SC0021386 (DE-FOA-0002214). Thanks to Dr.Beatice Bock 
+grant DE-SC0021386 (DE-FOA-0002214). Thanks to Dr. Beatice Bock 
 for literary encouragement, Callum Rohrer for constructive feedback 
 during beta testing, Dr. Nancy Collins Johnson for advising, 
 and all the NAU Soil Ecology Lab technicians who continue to provide refinement suggestions.
