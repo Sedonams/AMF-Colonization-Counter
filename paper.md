@@ -104,7 +104,7 @@ when the user reaches these totals.
 
 The application appears in two interface modes housed in the ‘Looks & Sounds’ menu. 
 Users can edit counter names colors and order to match specific scoring schema 
-when toggled out of 'Minimal Mode' (reffered to as 'Full Mode' in the source code).  
+when toggled out of 'Minimal Mode' (reffered to as 'Full Mode' in the source code). 
 Toggle to 'Minimal Mode' and the app presents large, simplified counters 
 optimal for rapid scoring \autoref{fig:1}.
 
@@ -118,8 +118,7 @@ is captured using a ranking system of 1-5 for specified fungal structures
 ![A Trouvelout method counter template would include these categories, shown here in 'Minimal Mode' and ‘dark mode’.\label{fig:2}](figure2.png)
 
 Each slide is treated as a discrete score. The application automatically records 
-the date and the duration of the score from the first counter press up to when saved. 
-This enables time tracking for each score to help the user control time spent on each slide.
+the date and the duration of the score from the first counter press up to when saved enabling time tracking for each score to help the user control time spent on each slide.
 
 'Counter Configurations' and score histories are stored locally in the browser 
 therefore an exporting function was integrated and is housed in the 'Tools' menu. 
