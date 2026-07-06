@@ -23,7 +23,7 @@ Quantifying fungal root colonization is a foundational task in plant-soil ecolog
 Current methods commonly rely on physical hand counters necessitating post hoc manual data transcription, 
 which is inherently inefficient and introduces potential error. 
 
-The `Radical Root Colonization Counter`, a lightweight web application, was designed 
+The *Radical Root Colonization Counter*, a lightweight web application, was designed 
 to streamline grid intersect root scoring. This tool enables rapid counting 
 using personalized keyboard key combinations, audio feedback for quality control, 
 customizable counter categories, and automated session data recording. 
@@ -49,7 +49,7 @@ Quantification of root colonization is an informative and often cost effective m
 
 Grid intersect methods have several limitations. First, each button on a hand counter corresponds to a structure, counter buttons are often being relabeled in a shared lab based on personal preference and an experiment's ‘structures-present’ specificity. This can add time to set up when button locations must be relabeled between scoring sessions. Second, transcription of counts from paper into digital datasets is time-consuming and introduces opportunities for scribal error. Third, all buttons produce the same “click” sound, which can increase error at speed because the sound confirms a button press, but not necessarily the correct button. Furthermore, both new and old hand counters are known to erroneously ‘click’ yet not add to a count, therefore best practice necessitates looking up from a slide to make sure the counter has counted, adding unnecessary mental load and seconds to every intersection (a single root count). Seconds become minutes when the user has 100 - 200 root intersections to count for a single sample.
 
-To address these shortcomings, the `Radical Root Colonization Counter` was developed, a browser-based web application designed to facilitate rapid and specialized scoring techniques enabling the generation of data ready for statistical analyses without transcription. This tool places an emphasis on minimal technical interaction, real-time audio and visual feedback, and instant generation of structured datasets.
+To address these shortcomings, the *Radical Root Colonization Counter* was developed, a browser-based web application designed to facilitate rapid and specialized scoring techniques enabling the generation of data ready for statistical analyses without transcription. This tool places an emphasis on minimal technical interaction, real-time audio and visual feedback, and instant generation of structured datasets.
 
 # State of the Field
 
@@ -81,7 +81,7 @@ Each slide is treated as a discrete score. The application automatically records
 
 # Research Impact Statement
 
-The `Radical Root Colonization Counter` was developed as a tool to assist in the colonization quantification of one project but has grown to be tested and used and by many others in the soil lab. It provides a simple, accessible solution for rapid and standardized root colonization scoring. By integrating keyboard-based input, real-time feedback, and structured data export, the counter reduces cognitive load, minimizes error, and improves efficiency. The keyboard-driven interface reduces hand movement and minimizes interaction. Audio feedback further reduces the need for visual confirmation, supporting efficient scoring. By eliminating manual transcription and enabling real-time data capture, the application reduces total processing time from observation to analysis-ready dataset. Direct digital recording of counts reduces transcription errors and standardizes data structure across scores. This application demonstrates the potential of developing lightweight digital tools to enhance data collection in ecological research.
+The *Radical Root Colonization Counter* was developed as a tool to assist in the colonization quantification of one project but has grown to be tested and used and by many others in the soil lab. It provides a simple, accessible solution for rapid and standardized root colonization scoring. By integrating keyboard-based input, real-time feedback, and structured data export, the counter reduces cognitive load, minimizes error, and improves efficiency. The keyboard-driven interface reduces hand movement and minimizes interaction. Audio feedback further reduces the need for visual confirmation, supporting efficient scoring. By eliminating manual transcription and enabling real-time data capture, the application reduces total processing time from observation to analysis-ready dataset. Direct digital recording of counts reduces transcription errors and standardizes data structure across scores. This application demonstrates the potential of developing lightweight digital tools to enhance data collection in ecological research.
 
 # AI Usage Disclosure
 
@@ -89,7 +89,7 @@ LLM-assisted code generation with Claude, ChatGPT and Gemini was used to acceler
 
 # Availability and Usage
 
-The `Radical Root Colonization Counter` is freely available as a browser-based
+The *Radical Root Colonization Counter* is freely available as a browser-based
 web application: [Radical Root Colonization Counter](sedonams.github.io/AMF-Colonization-Counter).
 [Radical Root Colonization Counter Source Code](github.com/Sedonams/AMF-Colonization-Counter).
 The software can also be downloaded and distributed as a standalone HTML file.
