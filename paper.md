@@ -13,7 +13,7 @@ authors:
 affiliations:
  - name: School of Earth and Sustainability, Northern Arizona University, Flagstaff, Arizona, United States
    index: 1
-date: 25 June 2026
+date: 6 July 2026
 bibliography: paper.bib
 ---
 
