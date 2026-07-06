@@ -41,7 +41,11 @@ supported by AI-assisted prototyping in the creation of specialized tools used f
 Quantification of root colonization is an informative and often cost effective metric
  in studies of plant-microbe interactions and soil ecosystem function [@Brundrett:2009]. 
  ‘Grid intersect scoring methods’ such as [@Trouvelot:1986] and [@McGonigle:1990] methods 
- are based on visual assessment of a representative subsample of root segments under compound microscope. Observed fungal root-colonizers vary by experiment but are broadly classified by Arbuscular Mycorrhizal Fungal (AMF) Structures, dark septate endophytes (DSE), non-am hyphae, plasmodiophorids, and olpidium structures. Counting is often done on hand counters followed by transcription of those counts onto a paper worksheet or directly into a digital spreadsheet.
+ are based on visual assessment of a representative subsample of root segments under compound microscope. 
+ Observed fungal root-colonizers vary by experiment but are broadly classified by Arbuscular Mycorrhizal Fungal (AMF) 
+ Structures, dark septate endophytes (DSE), non-am hyphae, plasmodiophorids, and olpidium structures. 
+ Counting is often done on hand counters followed by transcription of those counts onto a paper worksheet 
+ or directly into a digital spreadsheet.
 
 Grid intersect methods have several limitations. First, each button on a hand counter corresponds to a structure, counter buttons are often being relabeled in a shared lab based on personal preference and an experiment's ‘structures-present’ specificity. This can add time to set up when button locations must be relabeled between scoring sessions. Second, transcription of counts from paper into digital datasets is time-consuming and introduces opportunities for scribal error. Third, all buttons produce the same “click” sound, which can increase error at speed because the sound confirms a button press, but not necessarily the correct button. Furthermore, both new and old hand counters are known to erroneously ‘click’ yet not add to a count, therefore best practice necessitates looking up from a slide to make sure the counter has counted, adding unnecessary mental load and seconds to every intersection (a single root count). Seconds become minutes when the user has 100 - 200 root intersections to count for a single sample.
 
@@ -66,10 +70,10 @@ The application appears in two interface modes housed in the ‘Looks & Sounds�
 ![A simple McGonigle method counter template would include these categories, shown here in ‘minimal mode’ and ‘light mode’.\label{fig:1}]
 (figure1.png)
 
-If the user would like to score using the more accurate (Kokkoris 2019) yet more time consuming Trouvelot method wherein colonization intensity is captured using a ranking system of 1-5 for specified fungal structures; the categories could be as follows in \autoref{fig:2}.
+If the user would like to score using the more accurate yet often more time consuming Trouvelot method wherein colonization intensity is captured using a ranking system of 1-5 for specified fungal structures [@Kokkoris:2019]; the categories could be as follows in \autoref{fig:2}.
 
 ![A Trouvelout method counter template would include these categories, shown here in ‘full  mode’ and ‘dark mode’.\label{fig:2}]
-(figure2.png){ width=20% }
+(figure2.png)
 
 Each slide is treated as a discrete score. The application automatically records the date and the duration of the score from the first counter press up to when saved. This enables time tracking for each score to help the user control time spent on each slide.
 
@@ -86,10 +90,8 @@ LLM-assisted code generation with Claude, ChatGPT and Gemini was used to acceler
 # Availability and Usage
 
 The `Radical Root Colonization Counter` is freely available as a browser-based
-web application:
-- <https://sedonams.github.io/AMF-Colonization-Counter/>
-Source code is available at:
-- <https://github.com/Sedonams/AMF-Colonization-Counter>
+web application: [Radical Root Colonization Counter](sedonams.github.io/AMF-Colonization-Counter).
+[Radical Root Colonization Counter Source Code](github.com/Sedonams/AMF-Colonization-Counter).
 The software can also be downloaded and distributed as a standalone HTML file.
 
 # Acknowledgements
