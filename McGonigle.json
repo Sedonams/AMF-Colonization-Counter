@@ -1,0 +1,29 @@
+{
+  "name": "McGonigle",
+  "counters": [
+    {
+      "name": "No_Fungus",
+      "color": "#562929"
+    },
+    {
+      "name": "AM_Hyphae",
+      "color": "#0d0d87"
+    },
+    {
+      "name": "DSE",
+      "color": "#6d4218"
+    },
+    {
+      "name": "Arbuscule",
+      "color": "#0d0d87"
+    },
+    {
+      "name": "Vesicle",
+      "color": "#0d0d87"
+    },
+    {
+      "name": "Coil",
+      "color": "#0d0d87"
+    }
+  ]
+}
