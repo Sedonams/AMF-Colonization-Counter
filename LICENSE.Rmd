@@ -1,3 +1,9 @@
+---
+title: "MIT License"
+author: "Sedona Marie Spann"
+output: html_document
+---
+
 MIT License
 
 Copyright (c) [2026] [Sedona Marie Spann]
