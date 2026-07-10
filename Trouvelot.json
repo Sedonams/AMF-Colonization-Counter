@@ -1,0 +1,73 @@
+{
+  "name": "Trouvelot",
+  "counters": [
+    {
+      "name": "No_Fungus",
+      "color": "#6f3e3e"
+    },
+    {
+      "name": "AM_Hyphae_1",
+      "color": "#0d0d87"
+    },
+    {
+      "name": "AM_Hyphae_2",
+      "color": "#0d0d87"
+    },
+    {
+      "name": "AM_Hyphae_3",
+      "color": "#0d0d87"
+    },
+    {
+      "name": "AM_Hyphae_4",
+      "color": "#0d0d87"
+    },
+    {
+      "name": "AM_Hyphae_5",
+      "color": "#0d0d87"
+    },
+    {
+      "name": "Arbuscule_1",
+      "color": "#4c4cbd"
+    },
+    {
+      "name": "Arbuscule_2",
+      "color": "#4c4cbd"
+    },
+    {
+      "name": "Arbuscule_3",
+      "color": "#4c4cbd"
+    },
+    {
+      "name": "Arbuscule_4",
+      "color": "#4c4cbd"
+    },
+    {
+      "name": "Arbuscule_5",
+      "color": "#4c4cbd"
+    },
+    {
+      "name": "Vesicle_1",
+      "color": "#5a7baf"
+    },
+    {
+      "name": "Vesicle_2",
+      "color": "#5a7baf"
+    },
+    {
+      "name": "Vesicle_3",
+      "color": "#5a7baf"
+    },
+    {
+      "name": "Vesicle_4",
+      "color": "#5a7baf"
+    },
+    {
+      "name": "Vesicle_5",
+      "color": "#5a7baf"
+    },
+    {
+      "name": "Coil",
+      "color": "#555582"
+    }
+  ]
+}
